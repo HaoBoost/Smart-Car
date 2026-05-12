@@ -37,7 +37,7 @@ PKG_CONFIG_NAMES="\
 
 # 路径配置
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PARENT_DIR="$(cd "$(dirname "{BASE_SOURCES[0]}")/../" && pwd)"  # 压缩包/文件夹的目录路径（main 同级目录）
+PARENT_DIR="$(cd "${SCRIPT_DIR}/../" && pwd)"  # 压缩包/文件夹的目录路径（main 同级目录）
 TOOLS_DIR="${PARENT_DIR}/tools"                                 # tools 目录路径（main 同级目录）
 SEARCH_DIR="/home/"                                             # 搜索根路径
 OPENCV_PKG_REL_PATH="opencv_install/lib/pkgconfig/"             # OpenCV pkgconfig相对路径
@@ -452,7 +452,7 @@ log_info "依赖库的列表 ---> DEP_LIBS  ：${DEP_LIBS}"
 log_info "======================================================================================================================================================\n"
 
 # 脚本执行路径切换到脚本所在目录
-cd "$(dirname "${BASE_SOURCES[0]}")"
+cd "${SCRIPT_DIR}"
 log_info "🔧 脚本开始执行，当前工作目录：$(pwd)\n"
 
 # 先检查 tools 目录是否存在
@@ -514,9 +514,49 @@ log_info "======================================================================
 # 生成 CMake 可识别的宏文件
 log_info "================================================================== CMake 宏文件生成 =================================================================="
 log_info "🔧 开始生成 CMake 宏文件：${TOOLCHAIN_CMAKE_MACRO_FILE}"
-# 写入绝对路径宏（CMAKE_TOOLCHAIN_PATH 供 CMake 调用）
+# 写入 CMake 可复用的工具链查找逻辑
 cat > "${TOOLCHAIN_CMAKE_MACRO_FILE}" << EOF
-set(CMAKE_TOOLCHAIN_PATH "${toolchain_path}" CACHE PATH "Loongson toolchain path" FORCE)
+set(_lq_toolchain_candidates
+    "\$ENV{LQ_TOOLCHAIN_PATH}"
+    "${toolchain_path}"
+    "/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.3-1"
+    "\${CMAKE_CURRENT_LIST_DIR}/../tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6"
+    "\${CMAKE_CURRENT_LIST_DIR}/../tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.4"
+)
+
+if(NOT DEFINED CMAKE_TOOLCHAIN_PATH OR CMAKE_TOOLCHAIN_PATH STREQUAL "")
+    foreach(_candidate IN LISTS _lq_toolchain_candidates)
+        if(_candidate AND EXISTS "\${_candidate}/bin/loongarch64-linux-gnu-gcc")
+            set(CMAKE_TOOLCHAIN_PATH "\${_candidate}" CACHE PATH "Loongson toolchain path" FORCE)
+            break()
+        endif()
+    endforeach()
+endif()
+
+if((NOT DEFINED CMAKE_TOOLCHAIN_PATH OR CMAKE_TOOLCHAIN_PATH STREQUAL "") AND NOT DEFINED _lq_found_gcc)
+    find_program(_lq_found_gcc loongarch64-linux-gnu-gcc)
+    if(_lq_found_gcc)
+        get_filename_component(_lq_toolchain_bin "\${_lq_found_gcc}" DIRECTORY)
+        get_filename_component(_lq_toolchain_root "\${_lq_toolchain_bin}" DIRECTORY)
+        set(CMAKE_TOOLCHAIN_PATH "\${_lq_toolchain_root}" CACHE PATH "Loongson toolchain path" FORCE)
+    endif()
+endif()
+
+if(DEFINED CMAKE_TOOLCHAIN_PATH AND NOT CMAKE_TOOLCHAIN_PATH STREQUAL "")
+    set(CMAKE_TOOLCHAIN_PATH "\${CMAKE_TOOLCHAIN_PATH}" CACHE PATH "Loongson toolchain path")
+endif()
+
+if(DEFINED CMAKE_TOOLCHAIN_PATH AND EXISTS "\${CMAKE_TOOLCHAIN_PATH}/loongarch64-linux-gnu/sysroot")
+    set(CMAKE_SYSROOT "\${CMAKE_TOOLCHAIN_PATH}/loongarch64-linux-gnu/sysroot" CACHE PATH "Loongson sysroot path" FORCE)
+endif()
+
+if(DEFINED CMAKE_SYSROOT AND EXISTS "\${CMAKE_SYSROOT}")
+    set(CMAKE_FIND_ROOT_PATH "\${CMAKE_SYSROOT};\${CMAKE_TOOLCHAIN_PATH}" CACHE STRING "Loongson root paths" FORCE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER CACHE STRING "Program search mode" FORCE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY CACHE STRING "Library search mode" FORCE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY CACHE STRING "Include search mode" FORCE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY CACHE STRING "Package search mode" FORCE)
+endif()
 EOF
 # 验证宏文件是否生成
 if [ -f "${TOOLCHAIN_CMAKE_MACRO_FILE}" ]; then
@@ -573,7 +613,11 @@ fi
 
 # 创建并配置构建目录
 log_info "🔧 创建并配置构建目录：${BUILD_DIR}"
-cmake -B "${BUILD_DIR}" || log_error "❌ cmake 配置失败！"
+cmake -B "${BUILD_DIR}" \
+    -DLQ_ENABLE_OPENCV=ON \
+    -DLQ_ENABLE_NCNN=ON \
+    -DLQ_OPENCV_ROOT="${opencv_install_PATH%/}" \
+    -DLQ_NCNN_ROOT="${ncnn_install_PATH%/}" || log_error "❌ cmake 配置失败！"
 
 # 编译项目
 log_info "🔧 开始编译项目（线程数：${BUILD_THREADS}）"

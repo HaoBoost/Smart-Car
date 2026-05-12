@@ -7,40 +7,35 @@
  * @date    2026-01-10
  * @version V2.1.0
  * @note    适用与龙芯 2K0300/0301 平台.
- *          本 demo 实现 GTIM PWM 输出功能，用于测试 PWM 引脚的基本功能.
- *!         注意：该例程进攻测试 PWM，因给定占空比过大，请勿连接电机等设备，否则可能会损坏设备.
+ *          本 demo 按旧库 GTIM PWM 测试思路，调整 2 路舵机 PWM 的占空比.
  ********************************************************************************/
 
 /********************************************************************************
  * @brief   GTIM PWM 输出模式测试.
  * @param   none.
  * @return  none.
- * @note    初始构造方法有两种, 多文件赋值使用时也有两种方法.
+ * @note    对应旧库 GtimPwmTest，使用 88/89 引脚进行 GTIM PWM 输出.
  ********************************************************************************/
 void lq_gtim_pwm_demo(void)
 {
-    // 默认极性的构造方式
-    ls_gtim_pwm pwm1(GTIM_PWM0_PIN87, 100, 2000);
-    // 自定义极性的构造方式
-    ls_gtim_pwm pwm2(GTIM_PWM1_PIN88, 100, 2000, GTIM_PWM_POL_NORMAL);
-    // 拷贝构造使用方法, 调用 pwm3 与调用 pwm1 同效
-    ls_gtim_pwm pwm3(pwm1);
-    // 拷贝赋值使用方法, 调用 pwm4 与调用 pwm2 同效
-    ls_gtim_pwm pwm4 = pwm2;
+    ls_gtim_pwm pwm1(GTIM_PWM1_PIN88, 50, 1500);
+    ls_gtim_pwm pwm2(GTIM_PWM2_PIN89, 50, 1500, GTIM_PWM_POL_NORMAL);
 
     while (1)
     {
         pwm1.gtim_pwm_set_duty(1000);
-        pwm2.gtim_pwm_set_duty(2000);
+        pwm2.gtim_pwm_set_duty(1000);
+        printf("Gtim PWM Set %d\n", 1000);
         sleep(1);
-        pwm1.gtim_pwm_set_duty(3000);
-        pwm2.gtim_pwm_set_duty(4000);
-        sleep(1);
+
         pwm1.gtim_pwm_set_duty(5000);
-        pwm2.gtim_pwm_set_duty(6000);
+        pwm2.gtim_pwm_set_duty(5000);
+        printf("Gtim PWM Set %d\n", 5000);
         sleep(1);
-        pwm1.gtim_pwm_set_duty(7000);
-        pwm2.gtim_pwm_set_duty(8000);
+
+        pwm1.gtim_pwm_set_duty(9000);
+        pwm2.gtim_pwm_set_duty(9000);
+        printf("Gtim PWM Set %d\n", 9000);
         sleep(1);
     }
 }

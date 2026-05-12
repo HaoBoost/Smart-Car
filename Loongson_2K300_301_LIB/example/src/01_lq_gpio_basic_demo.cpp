@@ -6,28 +6,46 @@
  * @author  龙邱科技-012
  * @date    2026-01-10
  * @version V2.1.0
- * @note    适用与龙芯 2K0300/0301 平台
- *!         本 demo 实现 GPIO 输入输出功能，用于测试 GPIO 引脚的基本功能.
+ * @note    适用与龙芯 2K0300/0301 平台.
+ *!         本 demo 按旧库 GPIO 输出测试的思路，批量翻转常用 GPIO 引脚.
  ********************************************************************************/
 
 /********************************************************************************
  * @brief   GPIO 输出模式测试.
  * @param   none.
  * @return  none.
- * @note    GPIO 输出测试, 使用引脚 74 作为输出引脚, 交替输出高电平和低电平.
-            该引脚位于母板编码器 3 所用引脚上.
+ * @note    按旧库 LQ_Gpio_Out_Test 的寄存器版测试逻辑，批量翻转 22 个 GPIO.
  ********************************************************************************/
 void lq_gpio_output_demo(void)
 {
-    // 初始化 GPIO 引脚 74 为输出模式
-    ls_gpio gpio(PIN_74, GPIO_MODE_OUT);
+    #define LQ_GPIO_TEST_COUNT 22
+    gpio_pin_t gpio_pins[LQ_GPIO_TEST_COUNT] = {
+        PIN_88, PIN_89, PIN_73, PIN_72, PIN_75, PIN_74, PIN_50, PIN_51,
+        PIN_64, PIN_65, PIN_66, PIN_67, PIN_60, PIN_62, PIN_63, PIN_42,
+        PIN_43, PIN_44, PIN_45, PIN_48, PIN_49, PIN_61
+    };
+    ls_gpio gpios[LQ_GPIO_TEST_COUNT];
+
+    for (int i = 0; i < LQ_GPIO_TEST_COUNT; ++i)
+    {
+        gpios[i] = ls_gpio(gpio_pins[i], GPIO_MODE_OUT);
+    }
 
     while (1)
     {
-        gpio.gpio_level_set(GPIO_HIGH);
-        usleep(5000);
-        gpio.gpio_level_set(GPIO_LOW);
-        usleep(5000);
+        for (int i = 0; i < LQ_GPIO_TEST_COUNT; ++i)
+        {
+            gpios[i].gpio_level_set(GPIO_HIGH);
+        }
+        printf("Set gpio H\n");
+        sleep(1);
+
+        for (int i = 0; i < LQ_GPIO_TEST_COUNT; ++i)
+        {
+            gpios[i].gpio_level_set(GPIO_LOW);
+        }
+        printf("Set gpio L\n");
+        sleep(1);
     }
 }
 
@@ -40,12 +58,11 @@ void lq_gpio_output_demo(void)
  ********************************************************************************/
 void lq_gpio_input_demo(void)
 {
-    // 初始化 GPIO 引脚 74 为输入模式
     ls_gpio gpio(PIN_74, GPIO_MODE_IN);
 
     while (1)
     {
-        printf("gpio 77 value = %d\n", gpio.gpio_level_get());  // 获取并打印当前电平值
+        printf("gpio 74 value = %d\n", gpio.gpio_level_get());
         usleep(5000);
     }
 }

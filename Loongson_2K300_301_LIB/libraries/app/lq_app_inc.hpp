@@ -7,6 +7,9 @@
 #include "lq_i2c_mpu6050.hpp"
 #include "lq_i2c_icm42688.hpp"
 #include "lq_i2c_lsm6dsr.hpp"
+#include "image.hpp"
+#include "motor.hpp"
+#include "car_runtime.hpp"
 #include "lq_i2c_vl53l0x.hpp"
 
 #endif

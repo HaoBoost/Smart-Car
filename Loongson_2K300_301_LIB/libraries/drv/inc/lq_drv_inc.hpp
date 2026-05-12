@@ -3,11 +3,9 @@
 
 #include "lq_clock.hpp"
 #include "lq_camera.hpp"
-#include "lq_camera_ex.hpp"
 #include "lq_canfd.hpp"
 #include "lq_map_addr.hpp"
 #include "lq_module_load.hpp"
-#include "lq_ncnn.hpp"
 #include "lq_reg_adc.hpp"
 #include "lq_reg_atim_pwm.hpp"
 #include "lq_reg_gpio.hpp"
@@ -23,5 +21,13 @@
 #include "lq_udp_client.hpp"
 #include "lq_ntp.hpp"
 #include "lq_signal_handle.hpp"
+
+#ifdef LQ_HAVE_OPENCV
+#include "lq_camera_ex.hpp"
+#endif
+
+#ifdef LQ_HAVE_NCNN
+#include "lq_ncnn.hpp"
+#endif
 
 #endif
