@@ -1,6 +1,6 @@
 #ifndef __LQ_REG_PWM_ENCODER_HPP
 #define __LQ_REG_PWM_ENCODER_HPP
-
+//方向编码器
 #include <iostream>
 #include <pthread.h>
 #include "lq_reg_gpio.hpp"

@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main",
+    "C_Cpp.default.compilerPath": "loongarch64-linux-gnu-gcc"
+}

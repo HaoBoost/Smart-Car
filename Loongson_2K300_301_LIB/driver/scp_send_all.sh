@@ -2,9 +2,9 @@
 # 驱动模块批量发送总控脚本
 # 功能：遍历所有子目录，调用子目录的 scp_send.sh 脚本发送.ko文件到指定IP
 # 使用方法：
-#   1. 赋予执行权限：chmod +x send_all_ko.sh
-#   2. 基础用法：./send_all_ko.sh 目标IP [远程接收目录]
-#   3. 示例：./send_all_ko.sh 192.168.1.100 /root/drivers/
+#   1. 赋予执行权限：chmod +x scp_send_all.sh
+#   2. 基础用法：./scp_send_all.sh 目标IP [远程接收目录]
+#   3. 示例：./scp_send_all.sh 192.168.1.100 /root/drivers/
 
 # ===================== 配置项（可按需修改）=====================
 # 子目录中发送脚本的名称（固定为scp_send.sh）

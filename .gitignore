@@ -12,7 +12,10 @@ bin-release/
 *.air
 *.ipa
 *.apk
-
+#user generated/changed files
+Loongson_2k300_301_LIB/.vscode/
+Loongson_2k300_301_LIB/main/toolchain_path.cmake
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
+

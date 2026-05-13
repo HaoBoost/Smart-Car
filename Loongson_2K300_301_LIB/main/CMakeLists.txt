@@ -1,3 +1,4 @@
+include(toolchain_path.cmake)
 cmake_minimum_required(VERSION 3.16)    # 限制最低CMake版本
 
 # 设置交叉编译工具路径
@@ -9,9 +10,20 @@ endif()
 set(CMAKE_C_COMPILER "${CMAKE_TOOLCHAIN_PATH}/bin/loongarch64-linux-gnu-gcc")
 # 指定交叉编译工具所使用的C++编译器
 set(CMAKE_CXX_COMPILER "${CMAKE_TOOLCHAIN_PATH}/bin/loongarch64-linux-gnu-g++")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
+add_compile_options(
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wall;-O3;-pthread>"
+    "$<$<COMPILE_LANGUAGE:C>:-Wall;-O3>"
+)
 
 # 项目名称
-set(PROJECT_NAME "main")
+set(PROJECT_NAME main)
 
 project(${PROJECT_NAME})
 
@@ -23,7 +35,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/../libraries/app/display SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/../libraries/common/src SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/../libraries/drv/src SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/../example/src SRC)
-aux_source_directory(${PROJECT_SOURCE_DIR}/../user_app SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/../user_app/src SRC)
 
 # 指定所用的头文件路径
 include_directories(
@@ -34,7 +46,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/../libraries/common/inc
     ${PROJECT_SOURCE_DIR}/../libraries/drv/inc
     ${PROJECT_SOURCE_DIR}/../example/inc
-    ${PROJECT_SOURCE_DIR}/../user_app
+    ${PROJECT_SOURCE_DIR}/../user_app/inc
 )
 
 # 查找 pkgconfig 工具（必须，用于解析 .pc 文件）
@@ -42,8 +54,10 @@ find_package(PkgConfig REQUIRED)
 
 # 查找 OpenCV 动态库
 pkg_check_modules(OPENCV REQUIRED opencv4)
+#message(STATUS "OpenCV library list: ${OpenCV_LIBS}")
 
 # 查找 ncnn 动态库
+
 pkg_check_modules(NCNN REQUIRED ncnn)
 if(NCNN_FOUND)
     add_definitions(-DLQ_HAVE_OPENCV)
