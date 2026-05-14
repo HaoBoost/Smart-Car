@@ -227,7 +227,7 @@ CMAKE_SYSROOT:PATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
 //Loongson toolchain path
-CMAKE_TOOLCHAIN_PATH:PATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6
+CMAKE_TOOLCHAIN_PATH:PATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
