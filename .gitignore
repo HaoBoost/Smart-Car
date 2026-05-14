@@ -14,7 +14,12 @@ bin-release/
 *.apk
 #user generated/changed files
 .vscode/
+
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
+
+# Ignore Loongson main build folders (build, build-no-ncnn, build-verify, etc.)
+/Loongson_2K300_301_LIB/main/build*/
+/Loongson_2K300_301_LIB/main/build/
 
