@@ -13,6 +13,8 @@ typedef struct {
   int EC;
   float Kdin;
   float Kdout;
+  long long Outmax;
+  long long Outmin;
 } PID_Datatypedef;
 
 void Encoder_Test1(void);

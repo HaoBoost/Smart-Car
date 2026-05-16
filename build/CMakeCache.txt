@@ -15,10 +15,10 @@
 ########################
 
 //Path to a program.
-CMAKE_ADDR2LINE:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-addr2line
+CMAKE_ADDR2LINE:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-addr2line
 
 //Path to a program.
-CMAKE_AR:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ar
+CMAKE_AR:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ar
 
 //No help, variable specified on the command line.
 CMAKE_BUILD_TYPE:STRING=Debug
@@ -28,11 +28,11 @@ CMAKE_COLOR_MAKEFILE:BOOL=ON
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_AR:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ar
+CMAKE_CXX_COMPILER_AR:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ar
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ranlib
+CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ranlib
 
 //Flags used by the CXX compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
@@ -51,11 +51,11 @@ CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_AR:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ar
+CMAKE_C_COMPILER_AR:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ar
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_RANLIB:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ranlib
+CMAKE_C_COMPILER_RANLIB:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-gcc-ranlib
 
 //Flags used by the C compiler during all build types.
 CMAKE_C_FLAGS:STRING=
@@ -100,7 +100,7 @@ CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=/home/greenpia/WORKS/projects/Loongson_2
 CMAKE_INSTALL_PREFIX:PATH=/usr/local
 
 //Path to a program.
-CMAKE_LINKER:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ld
+CMAKE_LINKER:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ld
 
 //Path to a program.
 CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/gmake
@@ -126,13 +126,13 @@ CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_NM:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-nm
+CMAKE_NM:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-nm
 
 //Path to a program.
-CMAKE_OBJCOPY:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-objcopy
+CMAKE_OBJCOPY:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-objcopy
 
 //Path to a program.
-CMAKE_OBJDUMP:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-objdump
+CMAKE_OBJDUMP:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-objdump
 
 //Value Computed by CMake
 CMAKE_PROJECT_DESCRIPTION:STATIC=
@@ -144,10 +144,10 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 CMAKE_PROJECT_NAME:STATIC=main
 
 //Path to a program.
-CMAKE_RANLIB:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ranlib
+CMAKE_RANLIB:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-ranlib
 
 //Path to a program.
-CMAKE_READELF:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-readelf
+CMAKE_READELF:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-readelf
 
 //Flags used by the linker during the creation of shared libraries
 // during all build types.
@@ -197,13 +197,13 @@ CMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_STRIP:FILEPATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-strip
+CMAKE_STRIP:FILEPATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-strip
 
 //Path to a program.
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
 //Loongson toolchain path
-CMAKE_TOOLCHAIN_PATH:PATH=/opt/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6
+CMAKE_TOOLCHAIN_PATH:PATH=/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console

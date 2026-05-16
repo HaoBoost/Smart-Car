@@ -113,9 +113,9 @@ int Speed_Goal_l = 300;
 // 左电机PID输出值（赋初始值0）
 int Speed_PID_OUT_l = 0;
 // 左电机上一次误差（赋初始值0）
-int Speed_Lasterro_l = 0;
+int Speed_Lasterror_l = 0;
 // 左电机上上次误差（赋初始值0）
-int Speed_Preverro_l = 0;
+int Speed_Preverror_l = 0;
 
 // 右电机速度反馈值（赋初始值0）
 int16_t Speed_Encoder_r = 0;
@@ -132,9 +132,9 @@ int Speed_Goal_r = 300;
 // 右电机PID输出值（赋初始值0）
 int Speed_PID_OUT_r = 0;
 // 右电机上一次误差（赋初始值0）
-int Speed_Lasterro_r = 0;
+int Speed_Lasterror_r = 0;
 // 右电机上上次误差（赋初始值0）
-int Speed_Preverro_r = 0;
+int Speed_Preverror_r = 0;
 
 // PWM输出最大值（限制最高转速，初始值5000）
 int PWM_Max = 5000;
@@ -258,13 +258,13 @@ void Motor_Init1(int duty)
     // 清零右电机PID输出
     Speed_PID_OUT_r = 0;
     // 清零左电机历史误差
-    Speed_Lasterro_l = 0;
+    Speed_Lasterror_l = 0;
     // 清零右电机历史误差
-    Speed_Lasterro_r = 0;
+    Speed_Lasterror_r = 0;
     // 清零左电机更早误差
-    Speed_Preverro_l = 0;
+    Speed_Preverror_l = 0;
     // 清零右电机更早误差
-    Speed_Preverro_r = 0;
+    Speed_Preverror_r = 0;
     // 清零左电机差速目标
     Diff_SpeedL_expect = 0;
     // 清零右电机差速目标
@@ -390,16 +390,16 @@ void Motor_PID_Left(void)
     Speed_Erro_l = Diff_SpeedL_expect - Speed_Encoder_l;
 
     // 增量式PID公式计算输出
-    Speed_PID_OUT_l += static_cast<int>(Speed_P_l * (Speed_Erro_l - Speed_Lasterro_l) +
+    Speed_PID_OUT_l += static_cast<int>(Speed_P_l * (Speed_Erro_l - Speed_Lasterror_l) +
                                         Speed_I_l * Speed_Erro_l +
-                                        Speed_D_l * (Speed_Erro_l - 2 * Speed_Lasterro_l + Speed_Preverro_l));
+                                        Speed_D_l * (Speed_Erro_l - 2 * Speed_Lasterror_l + Speed_Preverror_l));
 
     // PID输出限幅
     Speed_PID_OUT_l = clamp_pid_output(Speed_PID_OUT_l, PWM_Min, PWM_Max);
 
     // 更新历史误差值
-    Speed_Preverro_l = Speed_Lasterro_l;
-    Speed_Lasterro_l = Speed_Erro_l;
+    Speed_Preverror_l = Speed_Lasterror_l;
+    Speed_Lasterror_l = Speed_Erro_l;
 
     // 根据PID输出正负控制方向和PWM
     if (Speed_PID_OUT_l >= 0)
@@ -426,16 +426,16 @@ void Motor_PID_Right(void)
     Speed_Erro_r = Diff_SpeedR_expect - Speed_Encoder_r;
 
     // 增量式PID公式计算输出
-    Speed_PID_OUT_r += static_cast<int>(Speed_P_r * (Speed_Erro_r - Speed_Lasterro_r) +
+    Speed_PID_OUT_r += static_cast<int>(Speed_P_r * (Speed_Erro_r - Speed_Lasterror_r) +
                                         Speed_I_r * Speed_Erro_r +
-                                        Speed_D_r * (Speed_Erro_r - 2 * Speed_Lasterro_r + Speed_Preverro_r));
+                                        Speed_D_r * (Speed_Erro_r - 2 * Speed_Lasterror_r + Speed_Preverror_r));
 
     // PID输出限幅
     Speed_PID_OUT_r = clamp_pid_output(Speed_PID_OUT_r, PWM_Min, PWM_Max);
 
     // 更新历史误差值
-    Speed_Preverro_r = Speed_Lasterro_r;
-    Speed_Lasterro_r = Speed_Erro_r;
+    Speed_Preverror_r = Speed_Lasterror_r;
+    Speed_Lasterror_r = Speed_Erro_r;
 
     // 根据PID输出正负控制方向和PWM
     if (Speed_PID_OUT_r >= 0)
