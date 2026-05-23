@@ -88,10 +88,10 @@ public:
     ls_gtim_pwm(gtim_pwm_pin_t _pin, uint32_t period, uint32_t duty, gtim_pwm_polarity_t _pola = GTIM_PWM_POL_INV);
 
 public:
-    ls_gtim_pwm(const ls_gtim_pwm& other) = delete;              // 禁用拷贝构造
-    ls_gtim_pwm(ls_gtim_pwm&& other) = delete;                   // 禁用移动构造
-    ls_gtim_pwm& operator=(const ls_gtim_pwm& other) = delete;   // 禁用拷贝赋值 
-    ls_gtim_pwm& operator=(ls_gtim_pwm&& other) = delete;        // 禁用移动赋值
+    ls_gtim_pwm(const ls_gtim_pwm& other) = delete;              // 拷贝构造
+    ls_gtim_pwm(ls_gtim_pwm&& other) = delete;                   // 移动构造
+    ls_gtim_pwm& operator=(const ls_gtim_pwm& other) = delete;   // 拷贝赋值 
+    ls_gtim_pwm& operator=(ls_gtim_pwm&& other) = delete;        // 移动赋值
 
 public:
     void gtim_pwm_enable(void);     // 使能 GTIM PWM 通道

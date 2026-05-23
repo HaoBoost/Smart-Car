@@ -59,7 +59,7 @@ typedef enum ls_enc_pwm_pin
 } ls_enc_pwm_pin_t;
 
 /****************************************************************************************************
- * @brief   类定义
+ * @brief   类定义（速度环相关）
  ****************************************************************************************************/
 
 class ls_encoder_pwm
@@ -76,10 +76,10 @@ public:
     void  encoder_reset_counter(void);          // 重置编码器计数器
     void  encoder_close_reset_counter(void);    // 关闭重置编码器计数器
 
-    ls_encoder_pwm(const ls_encoder_pwm& other) = delete;            // 拷贝构造
-    ls_encoder_pwm& operator=(const ls_encoder_pwm& other) = delete; // 拷贝赋值
-    ls_encoder_pwm(ls_encoder_pwm&& other) = delete;                 // 移动构造
-    ls_encoder_pwm& operator=(ls_encoder_pwm&& other) = delete;      // 移动赋值
+    ls_encoder_pwm(const ls_encoder_pwm& other) = delete;            // 禁用拷贝构造
+    ls_encoder_pwm& operator=(const ls_encoder_pwm& other) = delete; // 禁用拷贝赋值
+    ls_encoder_pwm(ls_encoder_pwm&& other) = delete;                 // 禁用移动构造
+    ls_encoder_pwm& operator=(ls_encoder_pwm&& other) = delete;      // 禁用移动赋值
 
 public:
     gpio_pin_t        encoder_get_pulse(void);      // 获取脉冲引脚
