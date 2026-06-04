@@ -63,17 +63,14 @@
 #include "motor.hpp"
 
 ////////////////////////////变量定义区///////////////////////////////////
-void signalHandler(int signum);
-std::atomic<bool> stopSignal1(false);
+// void signalHandler(int signum);
 // 删除冗余变量 stopSignal2
 // 在main.cpp的顶部添加声明，告诉编译器这个变量在别的文件里定义
 extern cv::Mat First_image; 
-
+timeval start_time, end_time;
 ////////////////////////////主函数区///////////////////////////////////////
 int main() 
 {
-    signal(SIGINT, signalHandler);
-
     cv::VideoCapture cap(0); 
     if (!cap.isOpened()) 
     {
@@ -86,13 +83,14 @@ int main()
     cap.set(cv::CAP_PROP_FPS, 120);  // 修复：改为摄像头支持的FPS
 
     // 修复：1. 先加载参数，再初始化硬件
-    Data_Settings(); 
-    Motor_Init1(1000);
+    Data_Settings(); //转向环相关
+    Motor_Init1(1000); 
     Motor_Argument();  
     sleep(2);
 
-    while (!stopSignal1) 
+    while (ls_system_running.load())
     {
+        gettimeofday(&start_time, nullptr);
         cap >> First_image; 
         if (First_image.empty()) 
         {
@@ -102,13 +100,14 @@ int main()
             continue;
         }    
 
-        ImageProcess();
+        ImageProcess(); //转向环
 
         // 修复：2. 调用总控函数（内部执行差速PID+双电机PID）
-        Motor_Control();
+        Motor_Control(); //速度环
 
+        gettimeofday(&end_time, nullptr);
         // 修复：3. 循环延时10ms，降低CPU占用，固定控制周期
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         printf("ImageStatus.Det_True: %d \n", ImageStatus.Det_True);    
     }
@@ -122,11 +121,11 @@ int main()
     return 0;
 }
 
-void signalHandler(int signum) 
-{
-    printf("\nCtrl+C安全退出...\n");
-    stopSignal1 = true;
-}
+// void signalHandler(int signum) 
+// {
+//     printf("\nCtrl+C安全退出...\n");
+//     ls_system_running.store(false);
+// }
 
 // 底部注释代码保留，不影响运行
         // beep.SetGpioValue(0);   // 关闭蜂鸣器

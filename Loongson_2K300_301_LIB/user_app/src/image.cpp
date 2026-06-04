@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include "main.hpp"
 
 #ifdef LQ_HAVE_OPENCV
 #include <opencv2/imgproc.hpp>
@@ -1975,9 +1976,12 @@ else
 }
 
 float Det = 0;
+
+extern timeval start_time, end_time;
 // 图像处理主函数
 void ImageProcess(void)
 {
+    PERIODIC(5000) //外环5ms周期
     static uint32_t image_debug_log_divider = 0;
 #ifdef LQ_HAVE_OPENCV
     Image_Process();

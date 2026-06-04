@@ -22,7 +22,7 @@ float Encoder_Left1(void);
 float Encoder_Right1(void);
 
 void Motor_Argument(void);
-void Motor_Init1(int duty = 1000);
+void Motor_Init1(int duty = 1000); //motor();
 void Left_Motor_Pwm1(int duty, bool dir);
 void Right_Motor_Pwm1(int duty, bool dir);
 void Motor_Disable1(void);

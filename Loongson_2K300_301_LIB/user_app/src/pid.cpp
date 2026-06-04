@@ -38,8 +38,18 @@
 // }
 
 
+
+//定义结构体
+// PID servo_pid;
+PID Lmotor_PID;     //左电机PID
+PID Rmotor_PID;     //右电机PID
+PID Angle_PID;      //角速度环
+PD_FF Angle_PID_F;  //角速度环
+PID Temp_PID;       //临时角度环（偏航角）
+PID Photo_PID;      //图像环
+
 //定义类
- extern Motor motor;
+// extern Motor motor;
 
 /**
  * ************************************************************************
@@ -86,6 +96,7 @@ void Incremental_PID_Cal(PID *pid, float set_value,float get_value)
         pid->output = pid->maxOutput;                                                   //输出限幅
     else if (pid->output < pid->minOutput)
         pid->output = pid->minOutput;													//输出限幅
+
 }
 
 
@@ -163,89 +174,89 @@ void PID_Reset(PID *pid)
 }
 
 //PID左电机设置速度
-static float L_filter_speed = 0.0f;  //上一次滤波后的速度
-void PID_Lmotor(int target)
-{    
-    //最新获取的编码器的值
-    float now_speed = -motor.encoder1_counts * 1.0f;
+// static float L_filter_speed = 0.0f;  //上一次滤波后的速度
+// void PID_Lmotor(int target)
+// {    
+//     //最新获取的编码器的值
+//     float now_speed = -motor.encoder1_counts * 1.0f;
 
-    //一阶低通滤波
-    float filt = 0.90f;
-    float filter_speed = filt * now_speed + (1 - filt) * L_filter_speed;
-    L_filter_speed = filter_speed;  //更新保存
+//     //一阶低通滤波
+//     float filt = 0.90f;
+//     float filter_speed = filt * now_speed + (1 - filt) * L_filter_speed;
+//     L_filter_speed = filter_speed;  //更新保存
 
-    //将滤波后的值用于PID
-    L_speed = filter_speed;
+//     //将滤波后的值用于PID
+//     L_speed = filter_speed;
 
-    //解算PID获得电机输出
-    Positional_PID_Cal(&Lmotor_PID,target,L_speed);
+//     //解算PID获得电机输出
+//     Positional_PID_Cal(&Lmotor_PID,target,L_speed);
 
-    if(Lmotor_PID.output < 0) motor.set_motor1(1,-Lmotor_PID.output);
-    else motor.set_motor1(0,Lmotor_PID.output);
-}
+//     if(Lmotor_PID.output < 0) motor.set_motor1(1,-Lmotor_PID.output);
+//     else motor.set_motor1(0,Lmotor_PID.output);
+// }
 
-//PID右电机设置速度
-static float R_filter_speed = 0.0f;  //上一次滤波后的速度
-void PID_Rmotor(int target)
-{
-    //最新获取的编码器的值
-    float now_speed = -motor.encoder2_counts * 1.0f;
+// //PID右电机设置速度
+// static float R_filter_speed = 0.0f;  //上一次滤波后的速度
+// void PID_Rmotor(int target)
+// {
+//     //最新获取的编码器的值
+//     float now_speed = -motor.encoder2_counts * 1.0f;
 
-    //一阶低通滤波
-    float filt = 0.90f;
-    float filter_speed = filt * now_speed + (1 - filt) * R_filter_speed;
-    R_filter_speed = filter_speed;  //更新保存
+//     //一阶低通滤波
+//     float filt = 0.90f;
+//     float filter_speed = filt * now_speed + (1 - filt) * R_filter_speed;
+//     R_filter_speed = filter_speed;  //更新保存
 
-    //将滤波后的值用于PID
-    R_speed = filter_speed;
+//     //将滤波后的值用于PID
+//     R_speed = filter_speed;
 
-    //解算PID获得电机输出
-    Positional_PID_Cal(&Rmotor_PID,target,R_speed);
+//     //解算PID获得电机输出
+//     Positional_PID_Cal(&Rmotor_PID,target,R_speed);
 
-    if(Rmotor_PID.output < 0) motor.set_motor2(1,-Rmotor_PID.output);
-    else motor.set_motor2(0,Rmotor_PID.output);
-}
+//     if(Rmotor_PID.output < 0) motor.set_motor2(1,-Rmotor_PID.output);
+//     else motor.set_motor2(0,Rmotor_PID.output);
+// }
 
 //PID智能车平滑起步，防止电机猛转
-float limit_p = 0.0f;
-void PID_CarStart(float target, float now_value, int step, PID *left_speed, PID *right_speed)
-{
-    //参数保护
-    if(step <= 0) return;
+// float limit_p = 0.0f;
+// void PID_CarStart(float target, float now_value, int step, PID *left_speed, PID *right_speed)
+// {
+//     //参数保护
+//     if(step <= 0) return;
 
-    //读取编码器数据
-    motor.update_encoders(); 
+//     //读取编码器数据
+//     motor.update_encoders(); 
 
-    //根据实际情况决定速度值
-    L_speed = -motor.encoder1_counts * 1.0f;
-    R_speed = -motor.encoder2_counts * 1.0f;
+//     //根据实际情况决定速度值
+//     L_speed = -motor.encoder1_counts * 1.0f;
+//     R_speed = -motor.encoder2_counts * 1.0f;
 
-    //通过单边电机判断，先对预设值赋值，使两电机初始限幅为0，以便于平滑启动
-    if(left_speed->maxOutput > limit_p)
-    {
-        limit_p = left_speed->maxOutput;
-        left_speed->maxOutput = 0;
-        right_speed->maxOutput = 0;
-    }
+//     //通过单边电机判断，先对预设值赋值，使两电机初始限幅为0，以便于平滑启动
+//     if(left_speed->maxOutput > limit_p)
+//     {
+//         limit_p = left_speed->maxOutput;
+//         left_speed->maxOutput = 0;
+//         right_speed->maxOutput = 0;
+//     }
 
-    //PID的使用
-    PID_Rmotor(target);
-    R_pwm = Rmotor_PID.output;
-    PID_Lmotor(target);
-    L_pwm = Lmotor_PID.output;
+//     //PID的使用
+//     PID_Rmotor(target);
+//     R_pwm = Rmotor_PID.output;
+//     PID_Lmotor(target);
+//     L_pwm = Lmotor_PID.output;
 
-    //左右电机限幅值根据步长缓慢上升，做到智能车平滑起步
-    if(target - now_value > target / step)
-    {
-        //左右电机限幅值缓慢上升
-        left_speed->maxOutput += limit_p/step;
-        right_speed->maxOutput += limit_p/step;
-        //防止电机实际限幅值超出预设值
-        left_speed->maxOutput = left_speed->maxOutput > limit_p ? limit_p : left_speed->maxOutput; 
-        right_speed->maxOutput = right_speed->maxOutput > limit_p ? limit_p : right_speed->maxOutput;
-    }
+//     //左右电机限幅值根据步长缓慢上升，做到智能车平滑起步
+//     if(target - now_value > target / step)
+//     {
+//         //左右电机限幅值缓慢上升
+//         left_speed->maxOutput += limit_p/step;
+//         right_speed->maxOutput += limit_p/step;
+//         //防止电机实际限幅值超出预设值
+//         left_speed->maxOutput = left_speed->maxOutput > limit_p ? limit_p : left_speed->maxOutput; 
+//         right_speed->maxOutput = right_speed->maxOutput > limit_p ? limit_p : right_speed->maxOutput;
+//     }
 
-}
+// }
 
 
 //PD+前馈控制器初始化
@@ -313,4 +324,49 @@ void PD_FF_Cal(PD_FF* pd, float target, float actual)
     //更新状态
     pd->last_error = pd->error;
     pd->last_target = target;
+
+}
+
+void PID_init(PID* lmotor, PID* Rmotor, PID* angle, PD_FF* angle_ff, PID* photo){
+    Positional_PID_Init(lmotor, 
+                        1.0f, 
+                        0.0f, 
+                        0.0f, 
+                        1000.0f, 
+                        0.0f, 
+                        1000.0f);
+
+    Positional_PID_Init(Rmotor, 
+                        1.0f, 
+                        0.0f,
+                        0.0f, 
+                        1000.0f, 
+                        0.0f, 
+                        1000.0f);
+
+
+    Positional_PID_Init(angle, 
+                        1.0f, 
+                        0.0f, 
+                        0.0f, 
+                        1000.0f, 
+                        -500.0f, 
+                        500.0f);
+
+    PD_FF_Init (angle_ff, 
+                1.0f, 
+                0.0f, 
+                0.0f, 
+                0.0f, 
+                500.0f, 
+                10.0f);
+
+
+    Positional_PID_Init(photo, 
+                        1.0f, 
+                        0.0f, 
+                        0.0f, 
+                        1000.0f, 
+                        -1000.0f, 
+                        1000.0f);
 }

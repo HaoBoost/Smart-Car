@@ -27,11 +27,9 @@
    */
 #define PERIODIC(x) \
     static uint64_t nxt = 0; \
-    if (end_time.tv_sec * 1000000 + end_time.tv_usec < nxt) { \
-     return 0; \
-    } \
+    if (end_time.tv_sec * 1000000 + end_time.tv_usec < nxt)  return;\
     nxt += (x); \
-
+    //是微秒哦
 #endif
 
 

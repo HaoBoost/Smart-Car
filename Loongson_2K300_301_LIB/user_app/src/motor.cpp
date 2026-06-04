@@ -1,223 +1,9 @@
-// 包含电机驱动模块头文件，声明电机相关硬件接口
-#include "motor.hpp"
+//motor.cpp重构
+#include "motor.h"
 
-// 包含C++标准智能指针库，用于硬件对象的内存管理
-#include <memory>
-
-// 匿名命名空间：封装电机硬件私有常量、对象、工具函数，外部无法访问
-namespace
-{
-// 左电机PWM输出引脚定义（高级定时器通道）
-constexpr atim_pwm_pin_t kLeftMotorPwmPin  = ATIM_PWM0_PIN81;
-// 右电机PWM输出引脚定义（高级定时器通道）
-constexpr atim_pwm_pin_t kRightMotorPwmPin = ATIM_PWM1_PIN82;
-// 左电机方向控制GPIO引脚定义
-constexpr gpio_pin_t kLeftMotorDirPin  = PIN_21;
-// 右电机方向控制GPIO引脚定义
-constexpr gpio_pin_t kRightMotorDirPin = PIN_22;
-// 左编码器脉冲采集引脚定义
-constexpr ls_enc_pwm_pin_t kLeftEncoderPin = ENC_PWM0_PIN64;
-// 右编码器脉冲采集引脚定义
-constexpr ls_enc_pwm_pin_t kRightEncoderPin = ENC_PWM1_PIN65;
-// 左编码器方向判断GPIO引脚定义
-constexpr gpio_pin_t kLeftEncoderDirPin  = PIN_72;
-// 右编码器方向判断GPIO引脚定义
-constexpr gpio_pin_t kRightEncoderDirPin = PIN_73;
-// 电机PWM驱动频率：10kHz（避免电机啸叫，驱动效率最优）
-constexpr uint32_t kMotorPwmFreqHz = 10000;
-// 电机初始化默认PWM占空比
-constexpr int kDefaultInitDuty = 1000;
-// 左电机前进时，方向GPIO输出电平
-constexpr bool kLeftForwardDir  = true;   
-// 右电机前进时，方向GPIO输出电平
-constexpr bool kRightForwardDir = false;  
-
-// 左电机PWM控制对象（智能指针）
-std::unique_ptr<ls_atim_pwm> left_motor_pwm;
-// 右电机PWM控制对象（智能指针）
-std::unique_ptr<ls_atim_pwm> right_motor_pwm;
-// 左电机方向GPIO控制对象
-std::unique_ptr<ls_gpio> left_motor_dir;
-// 右电机方向GPIO控制对象
-std::unique_ptr<ls_gpio> right_motor_dir;
-// 左编码器采集对象
-std::unique_ptr<ls_encoder_pwm> left_motor_encoder;
-// 右编码器采集对象
-std::unique_ptr<ls_encoder_pwm> right_motor_encoder;
-
-// 电机初始化状态标志：false=未初始化，true=初始化完成
-bool motor_initialized = false;
-
-// PWM占空比限幅函数：保证PWM值在有效范围内
-int clamp_pwm(int value)
-{
-    // 小于0则强制返回0（PWM无负占空比）
-    if (value < 0)
-    {
-        return 0;
-    }
-    // 大于PWM最大值则返回最大值
-    if (value > ATIM_PWM_DUTY_MAX)
-    {
-        return ATIM_PWM_DUTY_MAX;
-    }
-    // 合法范围直接返回原值
-    return value;
-}
-
-// PID输出限幅函数：限制PID计算结果在指定区间
-int clamp_pid_output(int value, int min_value, int max_value)
-{
-    // 小于最小值返回最小值
-    if (value < min_value)
-    {
-        return min_value;
-    }
-    // 大于最大值返回最大值
-    if (value > max_value)
-    {
-        return max_value;
-    }
-    // 合法范围直接返回原值
-    return value;
-}
-
-// 电机就绪检查函数：未初始化则自动初始化
-void ensure_motor_ready()
-{
-    // 判断初始化标志
-    if (!motor_initialized)
-    {
-        // 调用初始化函数，传入默认占空比
-        Motor_Init1(kDefaultInitDuty);
-    }
-}
-}
-
-// 左编码器实时脉冲值（赋初始值0）
-int16_t encoder_Left = 0;
-// 右编码器实时脉冲值（赋初始值0）
-int16_t encoder_Right = 0;
-// 左电机速度反馈值（赋初始值0）
-int16_t Speed_Encoder_l = 0;
-// 左电机PID比例系数（巡线小车最优初始值：18.0f）
-float Speed_P_l = 18.0f;
-// 左电机PID积分系数（巡线小车最优初始值：1.65f）
-float Speed_I_l = 1.65f;
-// 左电机PID微分系数（巡线小车最优初始值：1.0f）
-float Speed_D_l = 1.0f;
-// 左电机速度误差（赋初始值0）
-int Speed_Erro_l = 0;
-// 左电机目标速度（巡线小车最优初始值：300）
-int Speed_Goal_l = 300;
-// 左电机PID输出值（赋初始值0）
-int Speed_PID_OUT_l = 0;
-// 左电机上一次误差（赋初始值0）
-int Speed_Lasterror_l = 0;
-// 左电机上上次误差（赋初始值0）
-int Speed_Preverror_l = 0;
-
-// 右电机速度反馈值（赋初始值0）
-int16_t Speed_Encoder_r = 0;
-// 右电机PID比例系数（巡线小车最优初始值：18.0f）
-float Speed_P_r = 18.0f;
-// 右电机PID积分系数（巡线小车最优初始值：1.65f）
-float Speed_I_r = 1.65f;
-// 右电机PID微分系数（巡线小车最优初始值：1.0f）
-float Speed_D_r = 1.0f;
-// 右电机速度误差（赋初始值0）
-int Speed_Erro_r = 0;
-// 右电机目标速度（巡线小车最优初始值：300）
-int Speed_Goal_r = 300;
-// 右电机PID输出值（赋初始值0）
-int Speed_PID_OUT_r = 0;
-// 右电机上一次误差（赋初始值0）
-int Speed_Lasterror_r = 0;
-// 右电机上上次误差（赋初始值0）
-int Speed_Preverror_r = 0;
-
-// PWM输出最大值（限制最高转速，初始值5000）
-int PWM_Max = 5000;
-// PWM输出最小值（限制反转转速，初始值-5000）
-int PWM_Min = -5000;
-// 电机启动最低速度阈值（初始值80）
-int16_t Speed_Begin = 80;
-// 小车全局期望速度（初始值0）
-int16_t Speed_Expect = 0;
-// 两轮速度差误差（初始值0）
-float Diff_Speed_error = 0;
-// 左电机差速修正目标速度（初始值0）
-int16_t Diff_SpeedL_expect = 0;
-// 右电机差速修正目标速度（初始值0）
-int16_t Diff_SpeedR_expect = 0;
-// 转向PID比例系数（巡线最优初始值：10.242f）
-float Diff_Kp = 10.242f;
-// 转向PID微分系数（巡线最优初始值：10.274f）
-float Diff_Kd = 10.274f;
-// 电机停止标志：0=运行，1=停止（初始值0）
-uint8_t stop_flag = 0;
-
-// 读取左编码器值函数
-float Encoder_Left1(void)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-    // 获取左编码器计数（取反匹配硬件方向）
-    encoder_Left = -static_cast<int16_t>(left_motor_encoder->encoder_get_count());
-    // 返回编码器数值
-    return encoder_Left;
-}
-
-// 读取右编码器值函数
-float Encoder_Right1(void)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-    // 获取右编码器计数
-    encoder_Right = static_cast<int16_t>(right_motor_encoder->encoder_get_count());
-    // 返回编码器数值
-    return encoder_Right;
-}
-
-// 编码器测试函数：刷新编码器数据
-void Encoder_Test1(void)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-    // 读取左编码器（忽略返回值）
-    (void)Encoder_Left1();
-    // 读取右编码器（忽略返回值）
-    (void)Encoder_Right1();
-}
-
-// 电机PID参数配置函数
-void Motor_Argument(void)
-{
-    // 设置左电机目标速度
-    Speed_Goal_l = 300;
-    // 设置右电机目标速度
-    Speed_Goal_r = 300;
-
-    // 设置左电机PID比例参数
-    Speed_P_l = 18;
-    // 设置左电机PID积分参数
-    Speed_I_l = 1.65f;
-    // 设置左电机PID微分参数
-    Speed_D_l = 1;
-
-    // 设置右电机PID比例参数
-    Speed_P_r = 18;
-    // 设置右电机PID积分参数
-    Speed_I_r = 1.65f;
-    // 设置右电机PID微分参数
-    Speed_D_r = 1;
-}
-
-// 电机硬件初始化函数
-void Motor_Init1(int duty)
-{
+Motor::Motor(PID* Lmotor, PID* Rmotor, int duty = 1000) : Lmotor_PID(*Lmotor), Rmotor_PID(*Rmotor) {
     // 初始化占空比限幅处理
-    const uint32_t init_duty = static_cast<uint32_t>(clamp_pwm(duty));
+    const uint32_t init_duty = static_cast<uint32_t>((duty));
 
     // 初始化左电机PWM对象
     left_motor_pwm  = std::make_unique<ls_atim_pwm>(kLeftMotorPwmPin,  kMotorPwmFreqHz, init_duty, ATIM_PWM_POL_INV);
@@ -241,65 +27,14 @@ void Motor_Init1(int duty)
     // 右电机PWM占空比置0
     right_motor_pwm->atim_pwm_set_duty(0);
 
-    // 清零左编码器值
-    encoder_Left = 0;
-    // 清零右编码器值
-    encoder_Right = 0;
-    // 清零左电机速度反馈
-    Speed_Encoder_l = 0;
-    // 清零右电机速度反馈
-    Speed_Encoder_r = 0;
-    // 清零左电机误差
-    Speed_Erro_l = 0;
-    // 清零右电机误差
-    Speed_Erro_r = 0;
-    // 清零左电机PID输出
-    Speed_PID_OUT_l = 0;
-    // 清零右电机PID输出
-    Speed_PID_OUT_r = 0;
-    // 清零左电机历史误差
-    Speed_Lasterror_l = 0;
-    // 清零右电机历史误差
-    Speed_Lasterror_r = 0;
-    // 清零左电机更早误差
-    Speed_Preverror_l = 0;
-    // 清零右电机更早误差
-    Speed_Preverror_r = 0;
-    // 清零左电机差速目标
-    Diff_SpeedL_expect = 0;
-    // 清零右电机差速目标
-    Diff_SpeedR_expect = 0;
-    // 标记电机初始化完成
-    motor_initialized = true;
+    L_speed = 0.0f;
+    R_speed = 0.0f;
+
+    kMotorInitialized = true; // 设置电机初始化完成标志
 }
 
-// 左电机PWM+方向控制函数
-void Left_Motor_Pwm1(int duty, bool dir)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-    // 设置左电机方向电平
-    left_motor_dir->gpio_level_set(dir ? GPIO_HIGH : GPIO_LOW);
-    // 设置左电机PWM占空比
-    left_motor_pwm->atim_pwm_set_duty(static_cast<uint32_t>(clamp_pwm(duty)));
-}
-
-// 右电机PWM+方向控制函数
-void Right_Motor_Pwm1(int duty, bool dir)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-    // 设置右电机方向电平
-    right_motor_dir->gpio_level_set(dir ? GPIO_HIGH : GPIO_LOW);
-    // 设置右电机PWM占空比
-    right_motor_pwm->atim_pwm_set_duty(static_cast<uint32_t>(clamp_pwm(duty)));
-}
-
-// 电机失能函数：停止所有输出
-void Motor_Disable1(void)
-{
-    // 未初始化直接返回
-    if (!motor_initialized)
+Motor::~Motor() {
+    if (!kMotorInitialized)
     {
         return;
     }
@@ -307,213 +42,135 @@ void Motor_Disable1(void)
     left_motor_pwm->atim_pwm_set_duty(0);
     // 右电机PWM置0
     right_motor_pwm->atim_pwm_set_duty(0);
+
+    PID_Reset(&Lmotor_PID);
+    PID_Reset(&Rmotor_PID);
     // 关闭左电机PWM硬件
     left_motor_pwm->atim_pwm_disable();
     // 关闭右电机PWM硬件
     right_motor_pwm->atim_pwm_disable();
     // 标记电机未初始化
-    motor_initialized = false;
+    kMotorInitialized = false;
+} // 析构函数中不需要手动释放资源，智能指针会自动管理
+
+// void Motor::encoder_data(Motor::encoder& enc) {
+//     enc.left_count = -static_cast<int16_t>(left_motor_encoder->encoder_get_count());
+//     enc.right_count = static_cast<int16_t>(right_motor_encoder->encoder_get_count());
+// }
+Motor::encoder Motor::encoder_data() {
+    encoder enc;
+    enc.left_count = -static_cast<int16_t>(left_motor_encoder->encoder_get_count());
+    enc.right_count = static_cast<int16_t>(right_motor_encoder->encoder_get_count());
+    return enc;
 }
 
-// 电机总控制函数：核心逻辑
-void Motor_Control(void)
+void Motor::PID_Lmotor(){
+    //最新获取的编码器的值
+    float now_speed = encoder_data().left_count * 1.0f;
+
+    //一阶低通滤波
+    float filt = 0.90f;
+    float filter_speed = filt * now_speed + (1 - filt) * L_filter_speed;
+    L_filter_speed = filter_speed;  //更新保存
+
+    //将滤波后的值用于PID
+    L_speed = filter_speed;
+
+    //解算PID获得电机输出
+    Positional_PID_Cal(&Lmotor_PID,target,L_speed);
+
+    if(Lmotor_PID.output < 0) left_pwm_out(Lmotor_PID.output, true);
+    else left_pwm_out(Lmotor_PID.output, false);
+}
+
+void Motor::PID_Rmotor(){
+    //最新获取的编码器的值
+    float now_speed = encoder_data().right_count * 1.0f;
+
+    //一阶低通滤波
+    float filt = 0.90f;
+    float filter_speed = filt * now_speed + (1 - filt) * R_filter_speed;
+    R_filter_speed = filter_speed;  //更新保存
+
+    //将滤波后的值用于PID
+    R_speed = filter_speed;
+
+    //解算PID获得电机输出
+    Positional_PID_Cal(&Rmotor_PID,target,R_speed);
+
+    if(Rmotor_PID.output < 0) right_pwm_out(Rmotor_PID.output, true);
+    else right_pwm_out(Rmotor_PID.output, false);
+}
+
+void Motor::left_pwm_out(int duty ,bool dir)
 {
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
+    // 设置左电机方向电平
+    left_motor_dir->gpio_level_set(dir ? GPIO_HIGH : GPIO_LOW);
+    // 设置左电机PWM占空比
+    left_motor_pwm->atim_pwm_set_duty(static_cast<uint32_t>(duty)); // 占空比参数已经限幅了
+}
 
-    // 调试日志分频计数器，控制打印频率
-    static uint32_t debug_log_divider = 0;
+void Motor::right_pwm_out(int duty, bool dir) {
+    // 设置右电机方向电平
+    right_motor_dir->gpio_level_set(dir ? GPIO_HIGH : GPIO_LOW);
+    // 设置右电机PWM占空比
+    right_motor_pwm->atim_pwm_set_duty(static_cast<uint32_t>(duty));
+}
 
-    // 获取左编码器实时值
-    encoder_Left = -static_cast<int16_t>(left_motor_encoder->encoder_get_count());
-    // 获取右编码器实时值
-    encoder_Right = static_cast<int16_t>(right_motor_encoder->encoder_get_count());
+void Motor::PID_CarStart(float target, float now_value, int step, PID *left_speed, PID *right_speed){
+    //参数保护
+    if(step <= 0) return;
 
-    // 停止标志判断
-    if (stop_flag == 1)
+    //读取编码器数据
+    // motor.update_encoders(); 
+
+    //根据实际情况决定速度值
+    L_speed = encoder_data().left_count * 1.0f;
+    R_speed = encoder_data().right_count * 1.0f;
+
+    //通过单边电机判断，先对预设值赋值，使两电机初始限幅为0，以便于平滑启动
+    if(left_speed->maxOutput > limit_p)
     {
-        // 停止模式：目标速度置0
-        Speed_Goal_l = 0;
-        Speed_Goal_r = 0;
-    }
-    else
-    {
-        // 运行模式：设置目标速度
-        Speed_Goal_l = 300;
-        Speed_Goal_r = 300;
-
-        // 巡线阈值判断（头文件已定义top_point）
-        if (top_point < 15)
-        {
-            Speed_Goal_l = 300;
-            Speed_Goal_r = 300;
-        }
-        else
-        {
-            Speed_Goal_l = 300;
-            Speed_Goal_r = 300;
-        }
+        limit_p = left_speed->maxOutput;
+        left_speed->maxOutput = 0;
+        right_speed->maxOutput = 0;
     }
 
-    // 执行转向差速PID计算
-    Motor_Diff_Pid1();
-    // 执行左电机速度PID
-    Motor_PID_Left();
-    // 执行右电机速度PID
-    Motor_PID_Right();
+    //PID的使用
+    PID_Rmotor();
+    //R_pwm = Rmotor_PID.output;
+    left_pwm_out(Lmotor_PID.output, Lmotor_PID.output < 0);
+    PID_Lmotor();
+    // L_pwm = Lmotor_PID.output;
+    right_pwm_out(Rmotor_PID.output, Rmotor_PID.output < 0);
 
-    // 每30次循环打印一次调试信息
-    if (++debug_log_divider >= 30)
+    //左右电机限幅值根据步长缓慢上升，做到智能车平滑起步
+    if(target - now_value > target / step)
     {
-        debug_log_divider = 0;
-        // 计算图像中心误差（头文件已定义ImageStatus）
-        const int center_error = ImageStatus.Det_True - ImageStatus.MiddleLine;
-        // 打印误差、PID输出、编码器速度
-        printf("err=%4d  pidL=%6d  pidR=%6d  spdL=%4d  spdR=%4d\n",
-               center_error,
-               Speed_PID_OUT_l,
-               Speed_PID_OUT_r,
-               encoder_Left,
-               encoder_Right);
+        //左右电机限幅值缓慢上升
+        left_speed->maxOutput += limit_p/step;
+        right_speed->maxOutput += limit_p/step;
+        //防止电机实际限幅值超出预设值
+        left_speed->maxOutput = left_speed->maxOutput > limit_p ? limit_p : left_speed->maxOutput; 
+        right_speed->maxOutput = right_speed->maxOutput > limit_p ? limit_p : right_speed->maxOutput;
     }
 }
 
-// 左电机增量式PID控制函数
-void Motor_PID_Left(void)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-
-    // 获取左电机速度反馈
-    Speed_Encoder_l = encoder_Left;
-    // 计算左电机速度误差
-    Speed_Erro_l = Diff_SpeedL_expect - Speed_Encoder_l;
-
-    // 增量式PID公式计算输出
-    Speed_PID_OUT_l += static_cast<int>(Speed_P_l * (Speed_Erro_l - Speed_Lasterror_l) +
-                                        Speed_I_l * Speed_Erro_l +
-                                        Speed_D_l * (Speed_Erro_l - 2 * Speed_Lasterror_l + Speed_Preverror_l));
-
-    // PID输出限幅
-    Speed_PID_OUT_l = clamp_pid_output(Speed_PID_OUT_l, PWM_Min, PWM_Max);
-
-    // 更新历史误差值
-    Speed_Preverror_l = Speed_Lasterror_l;
-    Speed_Lasterror_l = Speed_Erro_l;
-
-    // 根据PID输出正负控制方向和PWM
-    if (Speed_PID_OUT_l >= 0)
-    {
-        // 正输出：前进
-        Left_Motor_Pwm1(Speed_PID_OUT_l, kLeftForwardDir);
-    }
-    else
-    {
-        // 负输出：后退
-        Left_Motor_Pwm1(-Speed_PID_OUT_l, !kLeftForwardDir);
-    }
+void Motor::Motor_proc() {
+    PERIODIC(1000) // 内环1ms周期
+    
 }
 
-// 右电机增量式PID控制函数
-void Motor_PID_Right(void)
-{
-    // 检查电机是否初始化完成
-    ensure_motor_ready();
-
-    // 获取右电机速度反馈
-    Speed_Encoder_r = encoder_Right;
-    // 计算右电机速度误差
-    Speed_Erro_r = Diff_SpeedR_expect - Speed_Encoder_r;
-
-    // 增量式PID公式计算输出
-    Speed_PID_OUT_r += static_cast<int>(Speed_P_r * (Speed_Erro_r - Speed_Lasterror_r) +
-                                        Speed_I_r * Speed_Erro_r +
-                                        Speed_D_r * (Speed_Erro_r - 2 * Speed_Lasterror_r + Speed_Preverror_r));
-
-    // PID输出限幅
-    Speed_PID_OUT_r = clamp_pid_output(Speed_PID_OUT_r, PWM_Min, PWM_Max);
-
-    // 更新历史误差值
-    Speed_Preverror_r = Speed_Lasterror_r;
-    Speed_Lasterror_r = Speed_Erro_r;
-
-    // 根据PID输出正负控制方向和PWM
-    if (Speed_PID_OUT_r >= 0)
-    {
-        // 正输出：前进
-        Right_Motor_Pwm1(Speed_PID_OUT_r, kRightForwardDir);
-    }
-    else
-    {
-        // 负输出：后退
-        Right_Motor_Pwm1(-Speed_PID_OUT_r, !kRightForwardDir);
-    }
-}
-
-// 转向差速PID函数：巡线自动转向
-void Motor_Diff_Pid1(void)
-{
-    // 上一次转向误差（静态变量）
-    static float last_turn_error = 0;
-
-    // 计算转向误差（头文件已定义ImageStatus）
-    float turn_error = ImageStatus.Det_True - (float)ImageStatus.MiddleLine;
-    // 误差死区：±2内视为无偏差
-    if (turn_error > -2.0f && turn_error < 2.0f)
-    {
-        turn_error = 0;
-    }
-
-    // 动态转向比例系数
-    float current_Kp = Diff_Kp;
-    // 小误差时降低系数，防止抖动
-    if (turn_error > -10.0f && turn_error < 10.0f)
-    {
-        current_Kp = Diff_Kp * 0.6f;
-    }
-
-    // PD转向控制计算
-    float turn_output = current_Kp * turn_error + Diff_Kd * (turn_error - last_turn_error);
-    // 保存当前误差
-    last_turn_error = turn_error;
-
-    // 转向输出限幅±500
-    if (turn_output > 500.0f)
-    {
-        turn_output = 500.0f;
-    }
-    if (turn_output < -500.0f)
-    {
-        turn_output = -500.0f;
-    }
-
-    // 计算基础速度，误差越大速度越低
-    int current_base_speed = Speed_Goal_l - static_cast<int>(my_abs(turn_error) * 3.5f);
-    // 基础速度下限120，防止堵转
-    if (current_base_speed < 120)
-    {
-        current_base_speed = 120;
-    }
-
-    // 计算左右电机差速目标速度
-    Diff_SpeedL_expect = static_cast<int16_t>(current_base_speed + static_cast<int>(turn_output));
-    Diff_SpeedR_expect = static_cast<int16_t>(current_base_speed - static_cast<int>(turn_output));
-
-    // 左右目标速度限幅0~1500
-    if (Diff_SpeedL_expect < 0)
-    {
-        Diff_SpeedL_expect = 0;
-    }
-    if (Diff_SpeedR_expect < 0)
-    {
-        Diff_SpeedR_expect = 0;
-    }
-    if (Diff_SpeedL_expect > 1500)
-    {
-        Diff_SpeedL_expect = 1500;
-    }
-    if (Diff_SpeedR_expect > 1500)
-    {
-        Diff_SpeedR_expect = 1500;
-    }
-}
+// // 接口示例
+// // 左电机PWM+方向控制函数
+// // @param duty  PWM占空比 (0~ATIM_PWM_DUTY_MAX)，自动限幅
+// // @param dir   方向: true=前进(kLeftForwardDir), false=后退
+// void Left_Motor_Pwm1(int duty, bool dir)
+// {
+//     // 检查电机是否初始化完成
+//     ensure_motor_ready();
+//     // 设置左电机方向电平
+//     left_motor_dir->gpio_level_set(dir ? GPIO_HIGH : GPIO_LOW);
+//     // 设置左电机PWM占空比
+//     left_motor_pwm->atim_pwm_set_duty(static_cast<uint32_t>(duty));
+// }

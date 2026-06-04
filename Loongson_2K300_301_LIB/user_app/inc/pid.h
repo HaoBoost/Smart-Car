@@ -45,6 +45,7 @@ typedef struct
     float error,lastError,lastlastError;    //误差、上次误差、上上次误差
     float integral,maxIntegral;             //积分、积分限幅
     float output,maxOutput,minOutput;       //输出、输出限幅
+    // float desire = 0.0f; //SP
 } PID;
 
 //PD+前馈控制结构体
@@ -68,13 +69,14 @@ typedef struct
     float last_derivative;    //上一次的微分项（用于低通滤波)
     float last_target_acc;    //上一次的目标角速度变化律（用于低通滤波）
 
+    // float desire = 0.0f; //SP
 } PD_FF;
 
 
 //保证编译pid.h的时，优先编译PID结构体定义，避免编译器未识别到PID结构体后去编译其他用了PID结构体的地方，导致报错
 #include "main.hpp"
 
-//普通PID控制
+//普通PID控制，增量式和位置式
 void Incremental_PID_Init(PID *pid, float p, float i, float d, float minOutput, float maxOutput);
 void Incremental_PID_Cal(PID *pid, float set_value, float get_value);
 
@@ -92,15 +94,15 @@ void PD_FF_Init(PD_FF* pd, float kp, float kd, float kff, float kff_acc, float m
 void PD_FF_Reset(PD_FF* pd);
 void PD_FF_Cal(PD_FF* pd, float target, float actual);
 
+void PID_init(PID* lmotor, PID* rmotor, PID* angle, PD_FF* angle_ff, PID* photo);
 
-//声明结构体
-PID servo_pid;
-PID Lmotor_PID; //左电机PID
-PID Rmotor_PID; //右电机PID
-PID Angle_PID;  //角速度环
-PD_FF Angle_PID_F;  //角速度环
-PID Temp_PID;   //临时角度环（偏航角,避障、进圆环用） 
-PID Photo_PID;      //图像环
+// 声明结构体
+extern PID Lmotor_PID; //左电机PID
+extern PID Rmotor_PID; //右电机PID
+extern PID Angle_PID;  //角速度环
+extern PD_FF Angle_PID_F;  //角速度环
+// extern PID Temp_PID;   //临时角度环（偏航角,避障、进圆环用） 
+extern PID Photo_PID;      //图像环
 
 // PID servo_pid, makeup_pid;
 
