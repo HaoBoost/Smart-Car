@@ -27,6 +27,11 @@ void lq_module_load_demo(void);     // 模块加载函数测试
 void lq_ips20_show_img_demo(void);  // IPS20 显示图像测试
 void lq_http_img_trans_demo(void);  // HTTP 图像传输测试
 void lq_uart_demo(void);            // UART 通信测试
+void lq_uart_thread_demo(void);     // UART 通信测试（独立线程接收模式）
+void lq_bh1750_demo(void);          // BH1750 光照传感器测试
+void lq_bd1202_gps_demo(void);      // BD1202 GPS模块测试
+void lq_dht11_demo(void);           // DHT11 温湿度传感器测试
+void lq_tracking_demo(void);        // 8 路灰度循迹传感器测试
 
 #endif
 

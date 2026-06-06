@@ -17,8 +17,8 @@ int i2c_read_regs(struct ls_i2c_dev *dev, u8 reg, void *val, int len)
     // 表示一个连接到 I2C 总线上的客户端设备
     struct i2c_client *cli = (struct i2c_client*)dev->client;
     
-    unsigned long old_time_out = cli->adapter->timeout;
-    cli->adapter->timeout = msecs_to_jiffies(5);
+    // unsigned long old_time_out = cli->adapter->timeout;
+    // cli->adapter->timeout = msecs_to_jiffies(5);
 
     // 配置第一个消息(写消息)
     msg[0].addr = cli->addr;// cli 指向的 I2C 设备的地址
@@ -32,7 +32,7 @@ int i2c_read_regs(struct ls_i2c_dev *dev, u8 reg, void *val, int len)
     msg[1].len = len;       // 消息长度为 len，即要从寄存器读取的字节数
     // 在 I2C 总线上进行数据传输
     ret = i2c_transfer(cli->adapter, msg, 2);
-    cli->adapter->timeout = old_time_out;
+    // cli->adapter->timeout = old_time_out;
     if (ret == 2)
         ret = 0;
     else

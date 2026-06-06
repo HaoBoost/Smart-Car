@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <mutex>
+#include <thread>
+#include <atomic>
+#include <functional>
 #include "lq_reg_gpio.hpp"
 #include "lq_clock.hpp"
 #include "lq_common.hpp"
@@ -131,6 +134,16 @@ typedef enum uart_pin
     // UART9_PIN66 = (UART_PORT_9<<10)|(GPIO_MUX_ALT2<<8)|PIN_66,
 } uart_pin_t;
 
+/* 接收模式枚举, 请勿修改 */
+typedef enum
+{
+    UART_MODE_BLOCKING = 0,     /*<! 阻塞模式（原始模式） */
+    UART_MODE_THREAD   = 1,     /*<! 独立线程模式（推荐，不影响主线程） */
+} ls_uart_rx_mode_t;
+
+/* 接收回调函数类型 */
+typedef std::function<void(const uint8_t data)> ls_uart_rx_callback_t;
+
 /****************************************************************************************************
  * @brief   类定义
  ****************************************************************************************************/
@@ -139,11 +152,13 @@ class ls_uart : public lq_auto_cleanup
 {
 public:
 	// 构造函数
-    ls_uart(uart_pin_t          _pin,                              /*<! 串口引脚 */
-            uint32_t            _baud   = 115200,                  /*<! 默认波特率为 115200 */
-			ls_uart_data_bits_t _data   = LS_UART_DATA8,           /*<! 默认 8 位数据 */
-            ls_uart_stop_bits_t _stop   = LS_UART_STOP1,           /*<! 默认 1 位停止位 */
-            ls_uart_parity_t    _parity = LS_UART_PARITY_NONE);    /*<! 默认无校验位 */
+    ls_uart(uart_pin_t            _pin,                             /*<! 串口引脚 */
+            uint32_t              _baud    = 115200,                /*<! 默认波特率为 115200 */
+			ls_uart_data_bits_t   _data    = LS_UART_DATA8,         /*<! 默认 8 位数据 */
+            ls_uart_stop_bits_t   _stop    = LS_UART_STOP1,         /*<! 默认 1 位停止位 */
+            ls_uart_parity_t      _parity  = LS_UART_PARITY_NONE,   /*<! 默认无校验位 */
+            ls_uart_rx_mode_t     _rx_mode = UART_MODE_THREAD,      /*<! 默认独立线程接收模式 */
+            ls_uart_rx_callback_t _cb      = nullptr);              /*<! 接收回调函数, 仅在独立线程接收模式下有效 */
     // 析构函数
 	~ls_uart();
 
@@ -167,6 +182,31 @@ public:
 	 * @note    接收数据时, 会阻塞等待, 直到接收完成或超时.
 	 ********************************************************************************/
     ssize_t uart_read(uint8_t *_buf, ssize_t _len, uint32_t _timeout = 100);
+
+public:
+    /********************************************************************************
+     * @brief   设置接收回调函数.
+     * @param   _cb : 接收回调函数.
+     * @return  none.
+     * @note    在线程接收模式下，当接收到数据时会自动调用该回调函数.
+     ********************************************************************************/
+    void uart_set_rx_callback(ls_uart_rx_callback_t _cb);
+
+    /********************************************************************************
+     * @brief   启动接收线程.
+     * @param   none.
+     * @return  none.
+     * @note    内部调用.
+     ********************************************************************************/
+    void uart_start_rx_thread();
+
+    /********************************************************************************
+     * @brief   停止接收线程.
+     * @param   none.
+     * @return  none.
+     * @note    外部可主动调用停止线程.
+     ********************************************************************************/
+    void uart_stop_rx_thread();
 
 public:
     uart_port_t         get_uart_port() const;  // 获取串口端口号
@@ -196,6 +236,15 @@ private:
 
     std::mutex  rx_mtx;     // 接收互斥锁
     std::mutex  tx_mtx;     // 发送互斥锁
+
+private:
+    ls_uart_rx_mode_t       m_rx_mode;      // 接收模式
+    ls_uart_rx_callback_t   m_rx_cb;        // 接收回调函数
+    std::thread             m_rx_thread;    // 接收线程
+    std::atomic<bool>       m_running;      // 线程运行标志
+
+private:
+    void rx_thread_func();  // 接收线程函数
 
 private:
     ls_uart_reg_t *uart_reg;    // UART 寄存器指针

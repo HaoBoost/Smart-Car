@@ -1,6 +1,7 @@
 #include "lq_reg_uart.hpp"
 #include "lq_map_addr.hpp"
 #include "lq_assert.hpp"
+#include "lq_signal_handle.hpp"
 
 /********************************************************************************
  * @brief   硬件配置 UART 的无参构造函数.
@@ -12,8 +13,16 @@
  * @return  none.
  * @note    none.
  ********************************************************************************/
-ls_uart::ls_uart(uart_pin_t _pin, uint32_t _baud, ls_uart_data_bits_t _data, ls_uart_stop_bits_t _stop, ls_uart_parity_t _parity) :
-    uart_reg(nullptr), rx_pin(PIN_INVALID), tx_pin(PIN_INVALID), port(UART_PORT_INVALID), baudrate(_baud), data_bits(_data), stop_bits(_stop), parity(_parity)
+ls_uart::ls_uart(uart_pin_t             _pin,
+                 uint32_t               _baud,
+                 ls_uart_data_bits_t    _data,
+                 ls_uart_stop_bits_t    _stop,
+                 ls_uart_parity_t       _parity,
+                 ls_uart_rx_mode_t      _rx_mode,
+                 ls_uart_rx_callback_t  _cb) :
+    uart_reg(nullptr), rx_pin(PIN_INVALID), tx_pin(PIN_INVALID),
+    port(UART_PORT_INVALID), baudrate(_baud), data_bits(_data), stop_bits(_stop), parity(_parity),
+    m_rx_mode(_rx_mode), m_rx_cb(_cb), m_running(false)
 {
     uint32_t tickstart = lq_get_tick_ms();
     if (_baud == 0) {
@@ -57,6 +66,10 @@ ls_uart::ls_uart(uart_pin_t _pin, uint32_t _baud, ls_uart_data_bits_t _data, ls_
     // 状态清空
     (void)this->uart_reg->LSR;
     (void)this->uart_reg->IIR;
+    // 根据模式启动接收线程
+    if (this->m_rx_mode == UART_MODE_THREAD) {
+        this->uart_start_rx_thread();
+    }
 }
 
 /********************************************************************************
@@ -188,6 +201,77 @@ uint32_t ls_uart::get_baudrate() const
 }
 
 /********************************************************************************
+ * @brief   UART 启动接收线程.
+ * @param   none.
+ * @return  none.
+ * @note    独立线程接收，不影响主线程.
+ ********************************************************************************/
+void ls_uart::uart_start_rx_thread()
+{
+    this->m_running = true;
+    this->m_rx_thread = std::thread(&ls_uart::rx_thread_func, this);
+}
+
+/********************************************************************************
+ * @brief   UART 停止接收线程.
+ * @param   none.
+ * @return  none.
+ * @note    外部可主动调用停止线程；析构时也会自动调用.
+ ********************************************************************************/
+void ls_uart::uart_stop_rx_thread()
+{
+    this->m_running = false;
+    if (this->m_rx_thread.joinable()) {
+        this->m_rx_thread.join();
+    }
+}
+
+/********************************************************************************
+ * @brief   UART 设置接收回调函数.
+ * @param   _cb : 接收回调函数.
+ * @return  none.
+ * @note    在线程接收模式下，当接收到数据时会自动调用该回调函数.
+ ********************************************************************************/
+void ls_uart::uart_set_rx_callback(ls_uart_rx_callback_t _cb)
+{
+    this->m_rx_cb = _cb;
+}
+
+/********************************************************************************
+ * @brief   UART 接收线程函数.
+ * @param   none.
+ * @return  none.
+ * @note    独立线程中轮询接收，通过回调通知主线程.
+ * @note    每次读取所有可用的数据，然后调用回调函数.
+ ********************************************************************************/
+void ls_uart::rx_thread_func()
+{
+    uint8_t ch;
+    ssize_t count = 0;
+
+    while (this->m_running && ls_system_running.load()) {
+        count = 0;
+        // 加锁读取所有可用数据
+        {
+            std::lock_guard<std::mutex> lock(this->rx_mtx);
+
+            if (this->uart_reg->LSR & LS_UART_LSR_DR) {
+                ch = this->uart_reg->DAT;
+                count = 1;
+            }
+        }
+        // 解锁后调用回调，避免死锁
+        if (count > 0) {
+            if (this->m_rx_cb) {
+                this->m_rx_cb(ch);
+            }
+        } else {
+            usleep(1); // 无数据时休眠 1ms，避免 CPU 占用过高
+        }
+    }
+}
+
+/********************************************************************************
  * @brief   UART 清理资源.
  * @param   none.
  * @return  none.
@@ -195,6 +279,7 @@ uint32_t ls_uart::get_baudrate() const
  ********************************************************************************/
 void ls_uart::cleanup()
 {
+    this->uart_stop_rx_thread();
     if (this->uart_reg != nullptr) {
         LQ::ls_addr_munmap((ls_reg32_addr_t)this->uart_reg);
         this->uart_reg  = nullptr;

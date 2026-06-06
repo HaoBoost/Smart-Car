@@ -38,3 +38,35 @@ void lq_uart_demo(void)
         usleep(100*1000);
     }
 }
+
+/********************************************************************************
+ * @brief   串口接收中断服务函数（独立线程中自动调用）
+ * @note    类似于单片机串口中断，有数据到达时自动触发
+ ********************************************************************************/
+static void uart_rx_irq_handler(const uint8_t data)
+{
+    printf("%c", data); // 打印接收到的单字节数据
+}
+
+/********************************************************************************
+ * @brief   UART 通信 demo（独立线程接收模式）.
+ * @param   none.
+ * @return  none.
+ * @note    本 demo 使用独立线程接收串口数据，类似于单片机串口中断.
+ *          主循环不再阻塞等待串口数据，可执行其他任务.
+ ********************************************************************************/
+void lq_uart_thread_demo(void)
+{
+    // 初始化串口，使用线程接收模式
+    ls_uart uart(UART1_PIN42, 115200, LS_UART_DATA8, LS_UART_STOP1, LS_UART_PARITY_NONE,
+                 UART_MODE_THREAD, uart_rx_irq_handler);
+
+    uint8_t send_buf[] = "Hello World!\n";
+
+    while (ls_system_running.load())
+    {
+        // 串口数据由独立线程自动接收，主循环只需处理发送和其他任务
+        uart.uart_write(send_buf, sizeof(send_buf));
+        usleep(100*1000);
+    }
+}

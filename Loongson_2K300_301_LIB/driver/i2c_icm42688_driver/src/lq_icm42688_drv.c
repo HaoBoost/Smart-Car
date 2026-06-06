@@ -4,9 +4,6 @@
 static float   _accelScale;
 static uint8_t _accelFS;
 
-static float   _gyroScale;
-static uint8_t _gyroFS;
-
 /********************************************************************************
  * @brief   设置陀螺仪测量范围
  * @param   dev : 自定义 I2C 相关结构体
@@ -29,7 +26,6 @@ int icm42688_set_gyro_fsr(struct ls_i2c_dev *dev, icm42688_gyro_fsr_t fsr)
         pr_err("%s: write GYRO_CONFIG0 failed\n", DEVICE_NAME);
         return -1;
     }
-    _gyroScale = (2000.0f / (float)(1 << fsr)) / 32768.0f;
     _gyroFS    = fsr;
     return 0;
 }
@@ -56,7 +52,6 @@ int icm42688_set_accel_fsr(struct ls_i2c_dev *dev, icm42688_accel_fsr_t fsr)
         pr_err("%s: write ACCEL_CONFIG0 failed\n", DEVICE_NAME);
         return -1;
     }
-    _accelScale =  (float)(1 << (4 - fsr)) / 32768.0f;
     _accelFS = fsr;
     return 0;
 }
@@ -98,42 +93,6 @@ int icm42688_set_filters(struct ls_i2c_dev *dev, bool af, bool gf)
     }
     return 0;
 }
-
-// /********************************************************************************
-//  * @brief   设置数字低通滤波
-//  * @param   dev : 自定义 I2C 相关结构体
-//  * @param   lpf : 数字低通滤波频率(Hz)
-//  * @return  为 1 表示设置成功，小于等于 0 表示设置失败
-//  * @date    2025/3/20
-//  ********************************************************************************/
-// uint8_t mpu6050_set_lpf(struct ls_i2c_dev *dev, uint16_t lpf)
-// {
-//     uint8_t dat = 0;
-//     if (lpf >= 188)     { dat = 1; }
-//     else if (lpf >= 98) { dat = 2; }
-//     else if (lpf >= 42) { dat = 3; }
-//     else if (lpf >= 20) { dat = 4; }
-//     else if (lpf >= 10) { dat = 5; }
-//     else                { dat = 6; }
-//     return i2c_write_reg(dev, MPU_CFG_REG, dat); // 设置数字低通滤波器
-// }
-
-// /********************************************************************************
-//  * @brief   设置采样率
-//  * @param   dev : 自定义 I2C 相关结构体
-//  * @param   rate: 4 ~ 1000(Hz)
-//  * @return  为 1 表示设置成功，小于等于 0 表示设置失败
-//  * @date    2025/3/20
-//  ********************************************************************************/
-// uint8_t mpu6050_set_rate(struct ls_i2c_dev *dev, uint16_t rate)
-// {
-//     uint8_t dat;
-//     if (rate > 1000) { rate = 1000; }
-//     if (rate < 4)    { rate = 4; }
-//     dat = 1000 / rate - 1;
-//     i2c_write_reg(dev, MPU_SAMPLE_RATE_REG, dat);   // 设置数字低通滤波器
-//     return mpu6050_set_lpf(dev, rate / 2);          // 自动设置LPF为采样率的一半
-// }
 
 /********************************************************************************
  * @brief    获取温度值
@@ -228,37 +187,60 @@ int icm42688_get_raw_data(struct ls_i2c_dev *dev, int16_t *dat)
  ********************************************************************************/
 int lq_i2c_icm42688_init(struct ls_i2c_dev *dev)
 {
+    int ret;
     u8 res;
+    /* 跳过软件复位 -- GPIO I2C 软复位后无法通信, 芯片 probe 阶段已确认正常 */
     /* 复位操作 */
-    i2c_write_reg(dev, REG_BANK_SEL, 0x00);             // 切换到BANK 0
-    i2c_write_reg(dev, UB0_REG_DEVICE_CONFIG, 0x01);    // 复位
-    delay_ms(5);                                        // 等待ICM42688恢复正常
-    i2c_write_reg(dev, UB0_REG_DRIVE_CONFIG, 0x05);     // 控制通信速度(复位)
-    delay_ms(5);
-    i2c_write_reg(dev, UB0_REG_INT_CONFIG, 0x02);       // 中断配置 0x02
-    delay_ms(5);
-    i2c_write_reg(dev, REG_BANK_SEL, 0x00);             // 切换到BANK 0
+    ret = i2c_write_reg(dev, REG_BANK_SEL, 0x00);             // 切换到BANK 0
+    if (ret < 1) {
+        pr_err("%s, REG_BANK_SEL failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    delay_ms(2);
+    
+    ret = i2c_write_reg(dev, UB0_REG_INT_CONFIG, 0x02);       // 中断配置 0x02
+    if (ret < 1) {
+        pr_err("%s: INT_CONFIG failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    
     res = i2c_read_reg_byte(dev, UB0_REG_WHO_AM_I);     // 读取设备 ID
     if (res != ICM42688_WHO_AM_I) {
-        pr_err("%s: init failed, who_am_i = 0x47 -> 0x%02x ?\n", DEVICE_NAME, res);
+        pr_err("%s: init failed, who_am_i = 0x47 -> 0x%02x\n", DEVICE_NAME, res);
         return -1;
     }
-    delay_ms(1);
     pr_err("%s: init success, who_am_i = 0x%02x\n", DEVICE_NAME, res);
     // 启用加速度计和陀螺仪，在低噪声(LN)模式
-    res = i2c_write_reg(dev, UB0_REG_PWR_MGMT0, 0x0F);
-    if (res < 1) {
-        pr_err("%s: init failed, pwr_mgmt0 = 0x%02x\n", DEVICE_NAME, res);
+    ret = i2c_write_reg(dev, UB0_REG_PWR_MGMT0, 0x0F);
+    if (ret < 1) {
+        pr_err("%s: init failed, pwr_mgmt0 = 0x%02x\n", DEVICE_NAME, ret);
         return -1;
     }
-    delay_ms(2);
-    i2c_write_reg(dev, UB0_REG_INT_CONFIG0, 0x00);       // 中断配置 0x00
-    delay_ms(2);
-    i2c_write_reg(dev, UB0_REG_INT_SOURCE0, 0x08);       // 中断源 0x08
-    delay_ms(2);
-    i2c_write_reg(dev, REG_BANK_SEL, 0x01);             // 切换到BANK 1
+    delay_ms(20);   // 加长等待电源稳定
+    ret = i2c_write_reg(dev, UB0_REG_INT_CONFIG0, 0x00);       // 中断配置 0x00
+    if (ret < 1) {
+        pr_err("%s: INT_CONFIG failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    delay_ms(5);
+    ret = i2c_write_reg(dev, UB0_REG_INT_SOURCE0, 0x08);       // 中断源 0x08
+    if (ret < 1) {
+        pr_err("%s: INT_SOURCEO failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    delay_ms(5);
+    ret = i2c_write_reg(dev, REG_BANK_SEL, 0x01);             // 切换到BANK 1
+    if (ret < 1) {
+        pr_err("%s: REG_BANK_SEL failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    delay_ms(5);
     i2c_write_reg(dev, UB1_REG_SENSOR_CONFIG0, 0x80);   // 开启加速度计和陀螺仪
-    delay_ms(2);
+    if (ret < 1) {
+        pr_err("%s: SENSOR_CONFIG0 failed, ret=%d\n", DEVICE_NAME, ret);
+        return -1;
+    }
+    delay_ms(5);
     // 设置加速度计的满量程范围
     if (icm42688_set_accel_fsr(dev, ICM42688_ACCEL_FSR_4G) != 0) {
         pr_err("%s: set_accel_fsr failed\n", DEVICE_NAME);

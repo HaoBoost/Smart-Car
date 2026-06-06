@@ -80,7 +80,7 @@ int device_inspection(struct ls_i2c_dev *dev, DeviceInitFunc deviceInit)
     ret = lq_i2c_icm42688_get_id(dev);
     if (ret != ICM42688_WHO_AM_I) {
         is_init = false;
-        printk(KERN_ERR "%s: failed to scan devices 0x%02x\n", DEVICE_NAME, dev->client->addr);
+        printk(KERN_ERR "%s: failed to scan devices 0x%02x, ret=0x%02x\n", DEVICE_NAME, dev->client->addr, ret);
         return ret;
     }
     if (!is_init) {
@@ -130,14 +130,14 @@ void cycle_work_handler(struct work_struct *work)
  ********************************************************************************/
 int i2c_open(struct inode *inode, struct file *f)
 {
-    // // 从 file 结构体中获取对应的字符设备结构体 cdev，cdev 结构体代表了字符设备在内核中的抽象表现
-    // struct cdev *cdev = f->f_path.dentry->d_inode->i_cdev;
-    // // 使用 container_of 宏根据 cdev 结构体的地址找到自定义结构体的地址
-    // struct ls_i2c_dev *dev = container_of(cdev, struct ls_i2c_dev, cdev);
+    // 从 file 结构体中获取对应的字符设备结构体 cdev，cdev 结构体代表了字符设备在内核中的抽象表现
+    struct cdev *cdev = f->f_path.dentry->d_inode->i_cdev;
+    // 使用 container_of 宏根据 cdev 结构体的地址找到自定义结构体的地址
+    struct ls_i2c_dev *dev = container_of(cdev, struct ls_i2c_dev, cdev);
     // 初始化设备
-    // if (device_init(dev) != 0) {
-    //     return -1;
-    // }
+    if (device_init(dev) != 0) {
+        return -1;
+    }
     return 0;
 }
 
@@ -362,6 +362,7 @@ static void __exit i2c_drv_exit(void)
 module_init(i2c_drv_init);                  // 指定加载函数
 module_exit(i2c_drv_exit);                  // 指定卸载函数
 MODULE_AUTHOR("LQ_012 <chiusir@163.com>");  // 作者以及邮箱
+MODULE_AUTHOR("东风谷草田");                 // 帮助优化人员
 MODULE_DESCRIPTION("ICM42605驱动");         // 模块简单介绍
 MODULE_VERSION("2.1");                      // 版本号
 MODULE_LICENSE("GPL");                      // 许可证声明

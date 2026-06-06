@@ -9,4 +9,9 @@
 #include "lq_i2c_lsm6dsr.hpp"
 #include "lq_i2c_vl53l0x.hpp"
 
+#include "lq_bh1750.hpp"
+#include "lq_bd_gps.hpp"
+#include "lq_dht11.hpp"
+#include "lq_tracking.hpp"
+
 #endif
