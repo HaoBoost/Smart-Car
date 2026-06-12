@@ -3,6 +3,10 @@
 #include <memory>
 #include "pid.h"
 #include "main.hpp"
+#include "image.hpp"
+
+extern float turn_error; // = ImageStatus.Det_True - (float)ImageStatus.MiddleLine;
+
 class Motor{ //电机和速度环相关（app），位置式PID
 
 
@@ -84,3 +88,7 @@ private:
     std::unique_ptr<ls_encoder_pwm> right_motor_encoder;
 
 };
+
+void motor_isr();
+
+

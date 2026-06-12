@@ -54,11 +54,11 @@
 // }
 
 
-#include <opencv2/opencv.hpp>  // 万能头文件，包含所有常用模块
-#include <opencv2/core.hpp>     // 核心模块（cv::命名空间基础）
-#include <opencv2/videoio.hpp> // 视频IO模块（VideoCapture/VideoWriter）
-#include <thread>
-#include <chrono>
+// #include <opencv2/opencv.hpp>  // 万能头文件，包含所有常用模块
+// #include <opencv2/core.hpp>     // 核心模块（cv::命名空间基础）
+// #include <opencv2/videoio.hpp> // 视频IO模块（VideoCapture/VideoWriter）
+// #include <thread>
+// #include <chrono>
 #include "main.hpp"
 #include "motor.hpp"
 
@@ -68,6 +68,21 @@
 // 在main.cpp的顶部添加声明，告诉编译器这个变量在别的文件里定义
 extern cv::Mat First_image; 
 timeval start_time, end_time;
+
+lq_timer *lq_pit0, *lq_pit1, *lq_pit2, *lq_pit3;//回调函数指针
+
+void pit0_callback() {
+    
+}
+void pit1_callback() {
+    motor_isr(); // 电机控制中断服务程序
+}
+void pit2_callback() {
+    
+}
+void pit3_callback() {
+    
+}
 ////////////////////////////主函数区///////////////////////////////////////
 int main() 
 {
@@ -88,6 +103,10 @@ int main()
     Motor_Argument();  
     sleep(2);
 
+    lq_pit0->set_seconds_ms(10, pit0_callback); // 10ms周期的定时器，执行菜单按键
+    lq_pit1->set_seconds_ms(1, pit1_callback); // 1ms周期的定时器，执行（电机控制）
+    lq_pit2->set_seconds_ms(2, pit2_callback); // 2ms周期的定时器，执行imu读取
+    lq_pit3->set_seconds_ms(5, pit3_callback); // 5ms周期的定时器，执行图像处理
     while (ls_system_running.load())
     {
         gettimeofday(&start_time, nullptr);
@@ -111,7 +130,9 @@ int main()
 
         printf("ImageStatus.Det_True: %d \n", ImageStatus.Det_True);    
     }
-
+    lq_pit1->stop();
+    lq_pit2->stop();
+    lq_pit3->stop();
     printf("startDisable\n");
     cap.release();
     Motor_Disable1();

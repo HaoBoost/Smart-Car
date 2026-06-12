@@ -15,6 +15,8 @@
 // 包含所有测试程序头文件
 #include "lq_all_demo.hpp"
 
+int64_t target_speed = 0;
+
   //实现根据x值进行的任务调度，比如：
   /*
    *  #define PERIODIC(x) \ 
@@ -30,6 +32,8 @@
     if (end_time.tv_sec * 1000000 + end_time.tv_usec < nxt)  return;\
     nxt += (x); \
     //是微秒哦
+
+
 #endif
 
 

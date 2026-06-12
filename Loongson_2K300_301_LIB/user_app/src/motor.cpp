@@ -161,6 +161,26 @@ void Motor::Motor_proc() {
     
 }
 
+void motor_isr() {
+    target_speed = 0;
+
+    int encoder_l = motor.encoder_data().left_count;
+    int encoder_r = motor.encoder_data().right_count; //获取实时编码器计数值
+
+    int diff_v = 0;
+
+    // diff_v与turn_error有关 （图像误差作用到电机上）
+    if (turn_error > 0) {
+        motor.L_filter_speed = target_speed + diff_v; //我想应该还有依据元素处理的diff_v的系数，或者这只是Kp ???  也许可以有一个专门的转向PID来处理turn_error，输出一个转向修正值，这个转向修正值就是diff_v
+        motor.R_filter_speed = target_speed - diff_v;
+    } else {
+        motor.L_filter_speed = target_speed - diff_v;
+        motor.R_filter_speed = target_speed + diff_v;
+    }
+    motor.left_pwm_out(motor.L_filter_speed, motor.L_filter_speed < 0);
+    motor.right_pwm_out(motor.R_filter_speed, motor.R_filter_speed < 0);
+}
+
 // // 接口示例
 // // 左电机PWM+方向控制函数
 // // @param duty  PWM占空比 (0~ATIM_PWM_DUTY_MAX)，自动限幅
