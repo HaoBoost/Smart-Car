@@ -1,94 +1,94 @@
-// motor.h 重构
+// motor.h —— 速度环（Motor）类，位置式PID，1ms周期
+// 负责：编码器读取、左右轮速度PID控制、差速分配、PWM输出、平滑起步
+
+#ifndef MOTOR_H
+#define MOTOR_H
 
 #include <memory>
 #include "pid.h"
 #include "main.hpp"
-#include "image.hpp"
 
-extern float turn_error; // = ImageStatus.Det_True - (float)ImageStatus.MiddleLine;
-
-class Motor{ //电机和速度环相关（app），位置式PID
-
-
+class Motor
+{
 public:
-    Motor(PID* Lmotor_PID, PID* Rmotor_PID, int duty = 1000);
+    // 构造函数：传入左右电机PID指针（拷贝参数），duty为初始化占空比
+    Motor(PID *Lmotor_PID, PID *Rmotor_PID, int duty = 1000);
     ~Motor();
 
-    PID Lmotor_PID, Rmotor_PID;
+    // ---- 编码器数据结构 ----
+    struct EncoderData
+    {
+        float left_count = 0.0f;
+        float right_count = 0.0f;
+    };
 
-    typedef struct {
-        float left_count = 0;
-        float right_count = 0;
-    }encoder;
-    // void encoder_data(encoder& enc);
-    encoder encoder_data();
+    // ---- PID 对象（从全局拷贝，独立运行） ----
+    PID Lmotor_PID;
+    PID Rmotor_PID;
 
-    float L_speed;
-    float R_speed;
+    // ---- 实时速度 ----
+    float L_speed = 0.0f;
+    float R_speed = 0.0f;
 
-    //PID左电机设置速度
-    inline static float L_filter_speed = 0.0f;  //上一次滤波后的速度
-    void PID_Lmotor();
-    //PID右电机设置速度
-    inline static float R_filter_speed = 0.0f;  //上一次滤波后的速度
-    void PID_Rmotor();
+    // ---- 核心接口 ----
 
-    //PID智能车平滑起步，防止电机猛转
-    float limit_p = 0.0f;
-    void PID_CarStart(float target, float now_value, int step, PID *left_speed, PID *right_speed);
-                      
+    // 读取编码器（一次读取左右，避免重复调用导致数据不同步）
+    EncoderData read_encoders();
 
-    void Motor_proc();
+    // 左电机速度PID：target = 目标速度（含差速修正）
+    void PID_Lmotor(float target);
+    // 右电机速度PID：target = 目标速度（含差速修正）
+    void PID_Rmotor(float target);
+
+    // 速度环主处理函数（1ms周期调用）
+    // target_speed: 基础目标速度, diff_speed: 差速修正量（来自角速度环）
+    void Motor_proc(float target_speed, float diff_speed);
+
+    // 平滑起步：逐步放开PID输出限幅
+    void PID_CarStart(float target, float now_value, int step,
+                      PID *left_speed, PID *right_speed);
+
+    // 直接PWM控制（调试用）
+    void left_pwm_out(int duty, bool dir);
+    void right_pwm_out(int duty, bool dir);
+
+    // 失能电机（停止PWM输出）
+    void disable();
+
+    // 查询初始化状态
+    bool is_initialized() const { return kMotorInitialized; }
 
 private:
-    int duty;
+    // ---- 滤波器状态 ----
+    float L_filter_speed = 0.0f; // 左轮一阶低通滤波上一次值
+    float R_filter_speed = 0.0f; // 右轮一阶低通滤波上一次值
 
-    // 电机初始化状态标志：false=未初始化，true=初始化完成
+    // ---- 平滑起步限幅 ----
+    float limit_p = 0.0f;
+
+    // ---- 初始化标志 ----
     bool kMotorInitialized = false;
 
-    void left_pwm_out(int duty ,bool dir);
-    void right_pwm_out(int duty,bool dir);
-
-private:
-    // 左电机PWM输出引脚定义（高级定时器通道）
-    static constexpr atim_pwm_pin_t kLeftMotorPwmPin  = ATIM_PWM0_PIN81;
-// 右电机PWM输出引脚定义（高级定时器通道）
+    // ---- 硬件引脚常量 ----
+    static constexpr atim_pwm_pin_t kLeftMotorPwmPin = ATIM_PWM0_PIN81;
     static constexpr atim_pwm_pin_t kRightMotorPwmPin = ATIM_PWM1_PIN82;
-// 左电机方向控制GPIO引脚定义
-    static constexpr gpio_pin_t kLeftMotorDirPin  = PIN_21;
-// 右电机方向控制GPIO引脚定义
+    static constexpr gpio_pin_t kLeftMotorDirPin = PIN_21;
     static constexpr gpio_pin_t kRightMotorDirPin = PIN_22;
-// 左编码器脉冲采集引脚定义
     static constexpr ls_enc_pwm_pin_t kLeftEncoderPin = ENC_PWM0_PIN64;
-// 右编码器脉冲采集引脚定义
     static constexpr ls_enc_pwm_pin_t kRightEncoderPin = ENC_PWM1_PIN65;
-// 左编码器方向判断GPIO引脚定义
-    static constexpr gpio_pin_t kLeftEncoderDirPin  = PIN_72;
-// 右编码器方向判断GPIO引脚定义
+    static constexpr gpio_pin_t kLeftEncoderDirPin = PIN_72;
     static constexpr gpio_pin_t kRightEncoderDirPin = PIN_73;
-// 电机PWM驱动频率：10kHz（避免电机啸叫，驱动效率最优）
     static constexpr uint32_t kMotorPwmFreqHz = 10000;
-// 电机初始化默认PWM占空比
-    static constexpr int kDefaultInitDuty = 1000;
-// 左电机前进时，方向GPIO输出电平
-    static constexpr bool kLeftForwardDir  = true;
-// 右电机前进时，方向GPIO输出电平
+    static constexpr bool kLeftForwardDir = true;
     static constexpr bool kRightForwardDir = false;
-// 左电机PWM控制对象（智能指针）
-    std::unique_ptr<ls_atim_pwm> left_motor_pwm;
-// 右电机PWM控制对象（智能指针）
-    std::unique_ptr<ls_atim_pwm> right_motor_pwm;
-// 左电机方向GPIO控制对象
-    std::unique_ptr<ls_gpio> left_motor_dir;
-// 右电机方向GPIO控制对象
-    std::unique_ptr<ls_gpio> right_motor_dir;
-// 左编码器采集对象
-    std::unique_ptr<ls_encoder_pwm> left_motor_encoder;
-// 右编码器采集对象
-    std::unique_ptr<ls_encoder_pwm> right_motor_encoder;
 
+    // ---- 硬件对象（智能指针自动管理生命周期） ----
+    std::unique_ptr<ls_atim_pwm> left_motor_pwm;
+    std::unique_ptr<ls_atim_pwm> right_motor_pwm;
+    std::unique_ptr<ls_gpio> left_motor_dir;
+    std::unique_ptr<ls_gpio> right_motor_dir;
+    std::unique_ptr<ls_encoder_pwm> left_motor_encoder;
+    std::unique_ptr<ls_encoder_pwm> right_motor_encoder;
 };
 
-void motor_isr();
-
-
+#endif // MOTOR_H

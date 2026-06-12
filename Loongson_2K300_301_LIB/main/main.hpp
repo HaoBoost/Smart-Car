@@ -2,6 +2,10 @@
 #define __MAIN_HPP
 
 #include <stdio.h>
+#include <sys/time.h>
+#include <thread>
+#include <chrono>
+#include <atomic>
 
 // 包含所有底层驱动头文件
 #include "lq_drv_inc.hpp"
@@ -15,25 +19,21 @@
 // 包含所有测试程序头文件
 #include "lq_all_demo.hpp"
 
-int64_t target_speed = 0;
+// 全局目标速度（差速PID的基准速度，由速度决策设定）
+extern float target_speed;
 
-  //实现根据x值进行的任务调度，比如：
-  /*
-   *  #define PERIODIC(x) \ 
-   *    static uint64_t nxt = 0; \
-   *    if (get_time_ms() < nxt) { \
-   *     return; \
-   *    } \
-   *    nxt += (x); \
-   * 但linux版，我们只创建一个线程，main中用裸机多任务模型，注意不要加分号！！！
-   */
-#define PERIODIC(x) \
-    static uint64_t nxt = 0; \
-    if (end_time.tv_sec * 1000000 + end_time.tv_usec < nxt)  return;\
-    nxt += (x); \
-    //是微秒哦
+// 时间戳（微秒级），用于裸机多任务模型
+extern timeval start_time, end_time;
 
+// 系统运行状态标志（Ctrl+C 安全退出）
+extern std::atomic<bool> ls_system_running;
+
+// 实现根据x值进行的任务调度（微秒级）
+// 用于在main循环中实现裸机多任务模型
+#define PERIODIC(x)                                         \
+    static uint64_t nxt = 0;                                \
+    if (end_time.tv_sec * 1000000 + end_time.tv_usec < nxt) \
+        return;                                             \
+    nxt += (x);
 
 #endif
-
-

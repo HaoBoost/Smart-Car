@@ -31,12 +31,14 @@ extern cv::Mat Gray_image;
 extern cv::Mat Bin_Frame;
 #endif
 
-typedef struct {
+typedef struct
+{
   int point;
   uint8_t type;
 } JumpPointtypedef;
 
-typedef struct {
+typedef struct
+{
   float nowspeed;
   int expectspeed;
   int motor_duty;
@@ -48,7 +50,8 @@ typedef struct {
   int straight_speed;
 } SpeedDatatypedef;
 
-typedef struct {
+typedef struct
+{
   uint8_t IsRightFind;
   uint8_t IsLeftFind;
   uint8_t isBlackFind;
@@ -70,7 +73,8 @@ typedef struct {
   int RightBoundary;
 } ImageDealDatatypedef;
 
-typedef enum {
+typedef enum
+{
   Normol,
   Straight,
   Cross,
@@ -84,7 +88,8 @@ typedef enum {
   Cross_ture,
 } RoadType_e;
 
-typedef struct {
+typedef struct
+{
   int TowPoint;
   int TowPointAdjust_v;
   int TowPoint_True;
@@ -140,7 +145,8 @@ typedef struct {
   int newblue_flag;
 } ImageStatustypedef;
 
-typedef struct {
+typedef struct
+{
   uint8_t SteerOK;
   uint8_t CameraOK;
   uint8_t OldCameraOK;
@@ -187,7 +193,8 @@ typedef struct {
   SpeedDatatypedef SpeedData;
 } SystemDatatypdef;
 
-typedef struct {
+typedef struct
+{
   int16_t image_element_rings;
   int16_t ring_big_small;
   int16_t image_element_rings_flag;
@@ -207,5 +214,38 @@ void DrawLine(void);
 void Element_Test(void);
 void Element_Handle(void);
 void cleanup(void);
+
+// ==================================================================
+// 图像环（ImageSteering）类 —— 转向PID，5ms周期
+// 负责：基于图像中线偏差计算转向PID，输出目标角速度给角速度环
+// ==================================================================
+
+#include "pid.h"
+
+// 图像中线偏差（由ImageProcess()更新，供ImageSteering使用）
+extern float turn_error;
+
+class ImageSteering
+{
+public:
+  // 构造函数：传入图像PID指针（拷贝参数）
+  ImageSteering(PID *photo_pid);
+  ~ImageSteering() = default;
+
+  // ---- PID对象（从全局拷贝，独立运行） ----
+  PID Photo_PID;
+
+  // ---- 核心接口 ----
+
+  // 图像环主处理函数（5ms周期调用，需在ImageProcess()之后）
+  // 返回：目标角速度 target_angle_rate，供角速度环使用
+  float proc();
+
+  // 获取当前中线偏差
+  float get_turn_error() const { return turn_error_; }
+
+private:
+  float turn_error_ = 0.0f;
+};
 
 #endif

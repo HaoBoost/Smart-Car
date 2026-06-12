@@ -1,93 +1,53 @@
 /********************************************************************************
  * @file            main.cpp
- * @brief           本文件是 LQ_2K300_301_LIB 软件开源库文件的一部分
+ * @brief           智能车主程序 —— 三环级联PID（OOP架构）
  * @copyright       版权所有 (C) 2025-2026 北京龙邱科技有限公司
  * @website         http://www.lqist.cn
  * @taobao          https://longqiu.taobao.com
  *
- * @description     龙邱科技 LS2K300/301 核心板驱动开源库声明
+ * @description     龙邱科技 LS2K300/301 核心板驱动开源库
  *
- * 本文件遵循 GPL-3.0 开源协议发布，旨在为龙芯 2K300/301 平台提供快速上手开发基于龙芯 2K300/301 平台的应用程序的参考实现.
+ * 本文件遵循 GPL-3.0 开源协议发布.
  * 商业用途(包括单位使用)需提前联系作者获取授权
- *
- * GPL-3.0 许可证声明摘要:
- * 1. 允许自由使用、修改、分发本软件
- * 2. 分发修改后的版本时，必须以相同许可证发布
- * 3. 必须保留原始版权声明和许可证信息
- * 4. 不提供任何担保，使用风险自负
- * 5. 完整协议文本请参见项目根目录 LICENSE 文件
  *
  * @author          龙邱科技-012
  * @email           chiusir@163.com
  * @version         V2.1.0
- * @update          2026-04-21
+ * @update          2026-06-13
  *
- * @note            使用本开源库前, 请确认板卡型号与 PMON 版本是否匹配.
- *                  龙邱 2K301 或已根据群文件升级系统的2K300可直接使用.
- *                  旧版本 2K300 需要修改时钟频率, 请到 lq_clock.hpp 文件修改 CONFIG_USE_PMON.
- *
- * @note            本库已重载 CTRL+C 信号, 按下 CTRL+C 时，会设置 ls_system_running 为 false，
- *                  从而退出所有正在运行的 demo 例程.
- * @note            如果用户在主程序写了自定义的循环，需要在循环中判断 ls_system_running.load() 是否为 true，
- *                  否则会导致程序无法退出.
+ * 三环级联PID架构:
+ *   图像环(5ms) → 目标角速度 → 角速度环(2ms) → 差速修正 → 速度环(1ms) → PWM
  ********************************************************************************/
 
-//  #include "main.hpp"
-
-// timeval start_time, end_time;
-// lq_timer *lq_pit0, *lq_pit1, *lq_pit2, *lq_pit3;//回调函数指针
-
-
-
-// int main()
-// {
-    
-//     while (ls_system_running.load()){
-//         gettimeofday(&start_time, nullptr);
-
-//         gettimeofday(&end_time, nullptr);
-//     }
-//     //要给pwm:0等
-
-//     //SIGINT后会自动析构对象
-//     return 0;
-// }
-
-
-// #include <opencv2/opencv.hpp>  // 万能头文件，包含所有常用模块
-// #include <opencv2/core.hpp>     // 核心模块（cv::命名空间基础）
-// #include <opencv2/videoio.hpp> // 视频IO模块（VideoCapture/VideoWriter）
-// #include <thread>
-// #include <chrono>
 #include "main.hpp"
-#include "motor.hpp"
+#include "car_runtime.hpp"
 
-////////////////////////////变量定义区///////////////////////////////////
-// void signalHandler(int signum);
-// 删除冗余变量 stopSignal2
-// 在main.cpp的顶部添加声明，告诉编译器这个变量在别的文件里定义
-extern cv::Mat First_image; 
-timeval start_time, end_time;
+// ========================== 全局变量定义 ==========================
 
-lq_timer *lq_pit0, *lq_pit1, *lq_pit2, *lq_pit3;//回调函数指针
+timeval start_time, end_time; // 时间戳（PERIODIC宏使用）
+float target_speed = 0.0f;    // 全局目标速度
 
-void pit0_callback() {
-    
-}
-void pit1_callback() {
-    motor_isr(); // 电机控制中断服务程序
-}
-void pit2_callback() {
-    
-}
-void pit3_callback() {
-    
-}
-////////////////////////////主函数区///////////////////////////////////////
-int main() 
+// ========================== 主函数 ==========================
+
+int main()
 {
-    cv::VideoCapture cap(0); 
-    if (!cap.isOpened()) 
+    printf("========================================\n");
+    printf("  智能车三环级联PID控制程序 (OOP架构)\n");
+    printf("  速度环(1ms) → 角速度环(2ms) → 图像环(5ms)\n");
+    printf("========================================\n");
+
+    // ---- 创建小车运行时对象 ----
+    CarRuntime car;
+
+    // 步骤1: 集中初始化所有PID参数
+    car.init_pid();
+
+    // 步骤2: 初始化硬件（Motor、IMU、摄像头等）
+    car.init_hardware(true, 1000);
+
+    // ---- 打开摄像头 ----
+    cv::VideoCapture cap(0);
+    if (!cap.isOpened())
     {
         std::cerr << "无法打开摄像头" << std::endl;
         return -1;
@@ -95,81 +55,60 @@ int main()
     cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
     cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, 120);
-    cap.set(cv::CAP_PROP_FPS, 120);  // 修复：改为摄像头支持的FPS
+    cap.set(cv::CAP_PROP_FPS, 120);
 
-    // 修复：1. 先加载参数，再初始化硬件
-    Data_Settings(); //转向环相关
-    Motor_Init1(1000); 
-    Motor_Argument();  
-    sleep(2);
+    sleep(2); // 等待摄像头稳定
 
-    lq_pit0->set_seconds_ms(10, pit0_callback); // 10ms周期的定时器，执行菜单按键
-    lq_pit1->set_seconds_ms(1, pit1_callback); // 1ms周期的定时器，执行（电机控制）
-    lq_pit2->set_seconds_ms(2, pit2_callback); // 2ms周期的定时器，执行imu读取
-    lq_pit3->set_seconds_ms(5, pit3_callback); // 5ms周期的定时器，执行图像处理
+    // ---- 定时器：调度三环 ----
+    lq_timer timer_1ms, timer_2ms, timer_5ms, timer_10ms;
+
+    // 1ms: 速度环（Motor PID + PWM输出）
+    timer_1ms.set_seconds_ms(1, [&car]()
+                             { car.on_timer_1ms(); });
+
+    // 2ms: 角速度环（IMU读取 + 角速度PID）
+    timer_2ms.set_seconds_ms(2, [&car]()
+                             { car.on_timer_2ms(); });
+
+    // 5ms: 图像环（图像处理 + 转向PID）
+    timer_5ms.set_seconds_ms(5, [&car]()
+                             { car.on_timer_5ms(); });
+
+    // 10ms: 调试打印（可选）
+    timer_10ms.set_seconds_ms(10, []()
+                              { printf("Det_True=%d  turn_error=%.1f\n",
+                                       ImageStatus.Det_True,
+                                       static_cast<float>(ImageStatus.Det_True) - static_cast<float>(ImageStatus.MiddleLine)); });
+
+    // ---- 主循环：持续捕获摄像头帧 ----
+    printf("智能车启动，按 Ctrl+C 安全退出...\n");
+
     while (ls_system_running.load())
     {
         gettimeofday(&start_time, nullptr);
-        cap >> First_image; 
-        if (First_image.empty()) 
+
+        cap >> First_image; // 捕获一帧
+        if (First_image.empty())
         {
-            std::cerr << "Error: Unable to grab frame." << std::endl;
-            // 修复：空帧跳过，不执行控制
+            std::cerr << "空帧，跳过..." << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
-        }    
-
-        ImageProcess(); //转向环
-
-        // 修复：2. 调用总控函数（内部执行差速PID+双电机PID）
-        Motor_Control(); //速度环
+        }
 
         gettimeofday(&end_time, nullptr);
-        // 修复：3. 循环延时10ms，降低CPU占用，固定控制周期
-        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-        printf("ImageStatus.Det_True: %d \n", ImageStatus.Det_True);    
     }
-    lq_pit1->stop();
-    lq_pit2->stop();
-    lq_pit3->stop();
-    printf("startDisable\n");
-    cap.release();
-    Motor_Disable1();
-    // 删除：退出后调用无效的 Motor_Diff_Pid1()
 
-    printf("Done\n");
+    // ---- 安全退出 ----
+    printf("\n正在安全退出...\n");
+
+    timer_1ms.stop();
+    timer_2ms.stop();
+    timer_5ms.stop();
+    timer_10ms.stop();
+
+    cap.release();
+    cleanup();
+
+    printf("程序已退出.\n");
     return 0;
 }
-
-// void signalHandler(int signum) 
-// {
-//     printf("\nCtrl+C安全退出...\n");
-//     ls_system_running.store(false);
-// }
-
-// 底部注释代码保留，不影响运行
-        // beep.SetGpioValue(0);   // 关闭蜂鸣器
- 
-        // GpioOutputTest1(88);    // GPIO输出功能(设备文件)
-        // GpioOutputTest2(88);    // GPIO输出功能(硬件)
-        // GpioInputTest1();       // GPIO输入功能(设备文件)
-        // GpioInputTest2();       // GPIO输入功能(硬件)
-        // PwmDevTest();           // PWM 测试(设备文件)
-        // PwmHWTest();            // PWM 测试(寄存器)
-        // GtimPwmTest();          // Gtim PWM 测试(硬件)
-        // EncoderTest();          // 编码器测试(寄存器)
-        // CameraTest();           // 摄像头测试
-        // AdcFunTest();           // ADC 功能测试
-        // TFTTest();              // TFT屏幕测试
-        // GetTimeTest();          // 时间戳打印测试
-        // sleepTest();            // sleep()函数测试 -- 以秒为单位延时
-        // usleepTest();           // usleep()函数测试 -- 以微秒为单位延时
-        // nanosleepTest();        // nanosleep()函数测试 -- 以纳秒为单位延时
-        // clock_nanosleepTest();  // clock_nanosleep()函数测试 -- 以纳秒为单位延时
-        //MotorTest();            // 电机测试程序
-        // ServoTest();舵机测试程序
-        // GpioTest();             // 久久派22个GPIO翻转测试
-        //MotorTestrun();
-        //Servo_Control();
-        // Motor_test_run(0);
