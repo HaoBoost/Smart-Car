@@ -2127,14 +2127,14 @@ void ImageProcess(void)
 }
 
 // ==================================================================
-// 图像环（ImageSteering）类实现 —— 转向PID，5ms周期
+// 图像环（ImageSteering）类实现 —— 转向PID + PD前馈，5ms周期
 // ==================================================================
 
 // 图像中线偏差全局变量（由ImageProcess()计算出Det_True后更新）
 float turn_error = 0.0f;
 
-ImageSteering::ImageSteering(PID *photo_pid)
-    : Photo_PID(*photo_pid)
+ImageSteering::ImageSteering(PID *photo_pid, PD_FF *photo_ff)
+    : Photo_PID(*photo_pid), Photo_PID_F(*photo_ff)
 {
 }
 
@@ -2144,9 +2144,12 @@ float ImageSteering::proc()
   turn_error_ = static_cast<float>(ImageStatus.Det_True) - static_cast<float>(ImageStatus.MiddleLine);
   turn_error = turn_error_; // 同步到全局变量（兼容旧代码）
 
-  // 位置式PID解算：set_value=0（期望中线无偏差），get_value=turn_error
+  // PD+前馈：target=0（期望中线无偏差），actual=turn_error
+  PD_FF_Cal(&Photo_PID_F, 0.0f, turn_error_);
+
+  // 位置式PID辅助修正
   Positional_PID_Cal(&Photo_PID, 0.0f, turn_error_);
 
-  // PID输出即为目标角速度（供角速度环使用）
-  return Photo_PID.output;
+  // 综合输出 = PD前馈 + PID修正，作为目标角速度（供角速度环使用）
+  return Photo_PID_F.output + Photo_PID.output;
 }

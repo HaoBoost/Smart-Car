@@ -27,11 +27,12 @@ CarRuntime::~CarRuntime()
 
 void CarRuntime::init_pid()
 {
-    // 集中初始化所有PID参数（位置式PID）
+    // 集中初始化所有PID参数
+    // 参数顺序: 左电机PID, 右电机PID, 角速度环PID, 图像环PD前馈, 图像环PID
     PID_init(&Lmotor_PID,  // 左电机速度环PID
              &Rmotor_PID,  // 右电机速度环PID
-             &Angle_PID,   // 角速度环PID
-             &Angle_PID_F, // 角速度环PD+前馈
+             &Angle_PID,   // 角速度环PID（纯位置式，无前馈）
+             &Photo_PID_F, // 图像环/转向环 PD+前馈
              &Photo_PID);  // 图像环PID
 }
 
@@ -50,11 +51,11 @@ void CarRuntime::init_hardware(bool enable_motor, int motor_init_duty)
         motor_ = std::make_unique<Motor>(&Lmotor_PID, &Rmotor_PID, motor_init_duty);
     }
 
-    // 创建IMU对象（角速度环）
-    imu_ = std::make_unique<IMU>(&Angle_PID, &Angle_PID_F);
+    // 创建IMU对象（角速度环，纯PID，无前馈）
+    imu_ = std::make_unique<IMU>(&Angle_PID);
 
-    // 创建ImageSteering对象（图像环）
-    image_steering_ = std::make_unique<ImageSteering>(&Photo_PID);
+    // 创建ImageSteering对象（图像环/转向环，PID + PD前馈）
+    image_steering_ = std::make_unique<ImageSteering>(&Photo_PID, &Photo_PID_F);
 
     // 初始化速度决策
     target_speed_ = 300.0f; // 默认基础速度

@@ -1,13 +1,13 @@
 // IMU.cpp —— 角速度环（IMU）类实现
-// 位置式PID / PD+前馈，2ms周期
+// 纯位置式PID，2ms周期
 
 #include "IMU.h"
 #include "lq_i2c_mpu6050.hpp"
 
 // ========================== 构造 & 析构 ==========================
 
-IMU::IMU(PID *angle_pid, PD_FF *angle_ff)
-    : Angle_PID(*angle_pid), Angle_PID_F(*angle_ff)
+IMU::IMU(PID *angle_pid)
+    : Angle_PID(*angle_pid)
 {
     // 初始化MPU6050驱动（使用默认设备路径）
     mpu6050_ = std::make_unique<lq_i2c_mpu6050>();
@@ -61,11 +61,8 @@ float IMU::IMU_proc(float target_angle_rate)
     // 读取当前角速度
     read_gyro_z();
 
-    // 使用位置式PID计算（角速度环也可以用PD_FF）
+    // 纯位置式PID计算
     Positional_PID_Cal(&Angle_PID, target_angle_rate, current_angle_rate_);
-
-    // 若配置了PD+前馈，也可以同时使用（可选叠加）
-    // PD_FF_Cal(&Angle_PID_F, target_angle_rate, current_angle_rate_);
 
     // 返回差速修正量（PID输出即为 diff_speed）
     return Angle_PID.output;

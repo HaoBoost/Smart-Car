@@ -216,8 +216,8 @@ void Element_Handle(void);
 void cleanup(void);
 
 // ==================================================================
-// 图像环（ImageSteering）类 —— 转向PID，5ms周期
-// 负责：基于图像中线偏差计算转向PID，输出目标角速度给角速度环
+// 图像环（ImageSteering）类 —— 转向PID + PD前馈，5ms周期
+// 负责：基于图像中线偏差计算转向PID(+前馈)，输出目标角速度给角速度环
 // ==================================================================
 
 #include "pid.h"
@@ -228,12 +228,13 @@ extern float turn_error;
 class ImageSteering
 {
 public:
-  // 构造函数：传入图像PID指针（拷贝参数）
-  ImageSteering(PID *photo_pid);
+  // 构造函数：传入图像PID和PD_FF指针（拷贝参数）
+  ImageSteering(PID *photo_pid, PD_FF *photo_ff);
   ~ImageSteering() = default;
 
-  // ---- PID对象（从全局拷贝，独立运行） ----
+  // ---- PID / PD_FF 对象（从全局拷贝，独立运行） ----
   PID Photo_PID;
+  PD_FF Photo_PID_F;
 
   // ---- 核心接口 ----
 

@@ -151,6 +151,9 @@ void Motor::right_pwm_out(int duty, bool dir)
 
 // ========================== 速度环主处理（1ms周期） ==========================
 
+// 防堵转：单轮最低目标速度（编码器单位），低于此值电机可能堵转
+static constexpr float kMinWheelSpeed = 50.0f;
+
 void Motor::Motor_proc(float target_speed, float diff_speed)
 {
     if (!kMotorInitialized)
@@ -159,6 +162,22 @@ void Motor::Motor_proc(float target_speed, float diff_speed)
     // 差速分配: 左轮加速、右轮减速 或 反之
     float L_target = target_speed + diff_speed;
     float R_target = target_speed - diff_speed;
+
+    // 防堵转：前进时左右轮不低于下限，后退时不高于上限（即绝对值不低于下限）
+    if (target_speed > 0.0f)
+    {
+        if (L_target < kMinWheelSpeed)
+            L_target = kMinWheelSpeed;
+        if (R_target < kMinWheelSpeed)
+            R_target = kMinWheelSpeed;
+    }
+    else if (target_speed < 0.0f)
+    {
+        if (L_target > -kMinWheelSpeed)
+            L_target = -kMinWheelSpeed;
+        if (R_target > -kMinWheelSpeed)
+            R_target = -kMinWheelSpeed;
+    }
 
     // 分别执行左右电机PID
     PID_Lmotor(L_target);

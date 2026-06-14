@@ -1,4 +1,4 @@
-// IMU.h —— 角速度环（IMU）类，位置式PID / PD+前馈，2ms周期
+// IMU.h —— 角速度环（IMU）类，纯位置式PID，2ms周期
 // 负责：MPU6050陀螺仪读取、角速度PID控制、输出差速修正量给速度环
 
 #ifndef IMU_H
@@ -14,13 +14,12 @@ class lq_i2c_mpu6050;
 class IMU
 {
 public:
-    // 构造函数：传入角速度PID和PD+前馈指针（拷贝参数）
-    IMU(PID *angle_pid, PD_FF *angle_ff);
+    // 构造函数：传入角速度PID指针（拷贝参数）
+    IMU(PID *angle_pid);
     ~IMU();
 
-    // ---- PID / PD_FF 对象（从全局拷贝，独立运行） ----
+    // ---- PID 对象（从全局拷贝，独立运行） ----
     PID Angle_PID;
-    PD_FF Angle_PID_F;
 
     // ---- 核心接口 ----
 
