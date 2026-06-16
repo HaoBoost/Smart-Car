@@ -79,7 +79,7 @@ private:
     static constexpr gpio_pin_t kLeftEncoderDirPin = PIN_72;
     static constexpr gpio_pin_t kRightEncoderDirPin = PIN_73;
     static constexpr uint32_t kMotorPwmFreqHz = 10000;
-    static constexpr bool kLeftForwardDir = true;
+    static constexpr bool kLeftForwardDir = false;
     static constexpr bool kRightForwardDir = false;
 
     // ---- 硬件对象（智能指针自动管理生命周期） ----

@@ -20,7 +20,7 @@
  ********************************************************************************/
 
 #include "main.hpp"
-#include "car_runtime.hpp"
+#include "image.hpp"
 
 // ========================== 全局变量定义 ==========================
 
@@ -74,11 +74,14 @@ int main()
     timer_5ms.set_seconds_ms(5, [&car]()
                              { car.on_timer_5ms(); });
 
-    // 10ms: 调试打印（可选）
-    timer_10ms.set_seconds_ms(10, []()
-                              { printf("Det_True=%d  turn_error=%.1f\n",
-                                       ImageStatus.Det_True,
-                                       static_cast<float>(ImageStatus.Det_True) - static_cast<float>(ImageStatus.MiddleLine)); });
+    // 10ms: VOFA+ JustFloat 发送目标速度 & 实时编码器速度
+    timer_10ms.set_seconds_ms(10, [&car]()
+                              {
+        // float data[3];
+        // data[0] = car.get_target_speed();   // ch0: 目标速度
+        // data[1] = car.motor_->L_speed;     // ch1: 左轮实时速度（编码器）
+        // data[2] = car.motor_->R_speed;    // ch2: 右轮实时速度（编码器）
+        /* vofa_send_justfloat(data, 3);*/ });
 
     // ---- 主循环：持续捕获摄像头帧 ----
     printf("智能车启动，按 Ctrl+C 安全退出...\n");

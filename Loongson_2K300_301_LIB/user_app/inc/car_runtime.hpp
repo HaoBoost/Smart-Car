@@ -5,9 +5,11 @@
 #define CAR_RUNTIME_HPP
 
 #include "lq_drv_inc.hpp"
-#include "image.hpp"
-#include "motor.h"
-#include "IMU.h"
+
+// 前向声明（避免循环包含，完整头文件在 car_runtime.cpp 中引入）
+class Motor;
+class IMU;
+class ImageSteering;
 
 #ifdef LQ_HAVE_OPENCV
 #include <opencv2/core/mat.hpp>
@@ -40,6 +42,8 @@ public:
 
     // ---- 状态查询 ----
     bool is_running() const { return running_; }
+    float get_left_speed() const;
+    float get_right_speed() const;
 
 private:
     // ---- 三环控制对象（智能指针，延迟初始化） ----

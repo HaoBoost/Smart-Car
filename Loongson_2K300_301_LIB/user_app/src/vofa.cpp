@@ -1,10 +1,6 @@
 #include "vofa.h"
 
-
-
-
-
-
+lq_udp_client vofa(VOFA_UDP_IP, VOFA_UDP_PORT);
 
 // #include "vofa.h"
 
@@ -32,10 +28,10 @@
 // {
 //     // 实际应用中可替换为传感器 / PID / 控制量等数据
 
-//         if(client.is_connected()){  
+//         if(client.is_connected()){
 
 //             // 发送一组波形数据与字符串到VOFA+服务器
-//             client.send_firewater("ware:%.02f,%.02f,%.02f,%.02f,%.02f\n", parameter1, parameter2, parameter3, parameter4, parameter5, parameter6);   
+//             client.send_firewater("ware:%.02f,%.02f,%.02f,%.02f,%.02f\n", parameter1, parameter2, parameter3, parameter4, parameter5, parameter6);
 //             // client.send_string("Hello, TCP Server!");
 //         }
 
@@ -45,9 +41,7 @@
 //             client.connect_server(SERVER_IP, SERVER_PORT);
 //         }
 
-//         // usleep(50000); 
+//         // usleep(50000);
 // }
 
 // Vofa vofa;
-
-

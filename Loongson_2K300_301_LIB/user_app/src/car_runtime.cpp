@@ -5,6 +5,9 @@
 #include "lq_common.hpp"
 #include "pid.h"
 #include "speeddecision.h"
+#include "IMU.h"
+#include "motor.h"
+#include "image.hpp"
 
 #ifdef LQ_HAVE_OPENCV
 #include <opencv2/core/mat.hpp>
@@ -94,6 +97,20 @@ void CarRuntime::on_timer_5ms()
     {
         target_angle_rate_ = image_steering_->proc();
     }
+}
+
+// ========================== 速度查询 ==========================
+
+float CarRuntime::get_left_speed() const
+{
+    if (motor_) return motor_->L_speed;
+    return 0.0f;
+}
+
+float CarRuntime::get_right_speed() const
+{
+    if (motor_) return motor_->R_speed;
+    return 0.0f;
 }
 
 // ========================== 主循环 ==========================

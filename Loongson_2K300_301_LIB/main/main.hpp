@@ -15,7 +15,8 @@
 
 // 包含所有应用层头文件
 #include "lq_app_inc.hpp"
-
+#include "car_runtime.hpp"
+#include "vofa.h"
 // 包含所有测试程序头文件
 #include "lq_all_demo.hpp"
 

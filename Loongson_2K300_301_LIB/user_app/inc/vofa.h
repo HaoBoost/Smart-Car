@@ -2,17 +2,21 @@
 #define __VOFA_H
 
 #include "main.hpp"
-#include "lq_tcp_client.hpp"
+#include "lq_udp_client.hpp"
 
-#define VOFA_TCP_IP ""
-#define VOFA_TCP_PORT 22
+#define CH_COUNT 3 // 通道数量
+struct Frame
+{
+    float fdata[CH_COUNT];
+    unsigned char tail[4]{0x00, 0x00, 0x80, 0x7f};
+};
 
-lq_tcp_client vofa(VOFA_TCP_IP, VOFA_TCP_PORT);
+#define VOFA_UDP_IP ""
+#define VOFA_UDP_PORT 1347
+
+extern lq_udp_client vofa;
 
 #endif // __VOFA_H
-
-
-
 
 // #ifndef __VOFA_H
 // #define __VOFA_H
@@ -25,7 +29,6 @@ lq_tcp_client vofa(VOFA_TCP_IP, VOFA_TCP_PORT);
 //     void vofa_read(float parameter1, float parameter2, float parameter3, float parameter4, float parameter5, float parameter6);     //vofa读取数据
 
 // private:
-    
 
 // };
 
@@ -33,4 +36,3 @@ lq_tcp_client vofa(VOFA_TCP_IP, VOFA_TCP_PORT);
 // extern VofaClient client;
 
 // #endif
-
