@@ -10,6 +10,7 @@
 class Motor;
 class IMU;
 class ImageSteering;
+class SpeedDecision;
 
 #ifdef LQ_HAVE_OPENCV
 #include <opencv2/core/mat.hpp>
@@ -45,17 +46,18 @@ public:
     float get_left_speed() const;
     float get_right_speed() const;
 
-private:
     // ---- 三环控制对象（智能指针，延迟初始化） ----
     std::unique_ptr<Motor> motor_;
     std::unique_ptr<IMU> imu_;
     std::unique_ptr<ImageSteering> image_steering_;
+    std::unique_ptr<SpeedDecision> speed_decision_;
 
     // ---- 级联PID中间变量 ----
-    float target_speed_ = 0.0f;      // 基础目标速度（由速度决策设定）
+    // target_speed 使用全局变量（main.hpp extern），作为速度决策→差速→电机的核心桥梁
     float diff_speed_ = 0.0f;        // 差速修正量（角速度环 → 速度环）
     float target_angle_rate_ = 0.0f; // 目标角速度（图像环 → 角速度环）
-
+    
+private:
     bool running_ = false;
     bool motor_enabled_ = true;
 };

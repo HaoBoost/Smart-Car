@@ -39,11 +39,11 @@
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..."
 				}
 			],
 			"type" : "STRING",
-			"value" : "Debug"
+			"value" : ""
 		},
 		{
 			"name" : "CMAKE_CACHEFILE_DIR",
@@ -526,12 +526,16 @@
 			"properties" : 
 			[
 				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "Enable/Disable output of compile commands during generation."
 				}
 			],
 			"type" : "BOOL",
-			"value" : "TRUE"
+			"value" : ""
 		},
 		{
 			"name" : "CMAKE_EXTRA_GENERATOR",
@@ -556,66 +560,6 @@
 			],
 			"type" : "STATIC",
 			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/build/CMakeFiles/pkgRedirects"
-		},
-		{
-			"name" : "CMAKE_FIND_ROOT_PATH",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Loongson root paths"
-				}
-			],
-			"type" : "STRING",
-			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/loongarch64-linux-gnu/sysroot;/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6"
-		},
-		{
-			"name" : "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Include search mode"
-				}
-			],
-			"type" : "STRING",
-			"value" : "ONLY"
-		},
-		{
-			"name" : "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Library search mode"
-				}
-			],
-			"type" : "STRING",
-			"value" : "ONLY"
-		},
-		{
-			"name" : "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Package search mode"
-				}
-			],
-			"type" : "STRING",
-			"value" : "ONLY"
-		},
-		{
-			"name" : "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Program search mode"
-				}
-			],
-			"type" : "STRING",
-			"value" : "NEVER"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -1174,18 +1118,6 @@
 			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin/loongarch64-linux-gnu-strip"
 		},
 		{
-			"name" : "CMAKE_SYSROOT",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Loongson sysroot path"
-				}
-			],
-			"type" : "PATH",
-			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/loongarch64-linux-gnu/sysroot"
-		},
-		{
 			"name" : "CMAKE_TAPI",
 			"properties" : 
 			[
@@ -1242,51 +1174,855 @@
 			"value" : "FALSE"
 		},
 		{
-			"name" : "LQ_ENABLE_NCNN",
+			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Enable NCNN-dependent modules"
+					"value" : "Details about finding PkgConfig"
 				}
 			],
-			"type" : "BOOL",
-			"value" : "OFF"
+			"type" : "INTERNAL",
+			"value" : "[/usr/bin/pkg-config][v1.8.1()]"
 		},
 		{
-			"name" : "LQ_ENABLE_OPENCV",
+			"name" : "NCNN_CFLAGS",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Enable OpenCV-dependent modules"
+					"value" : ""
 				}
 			],
-			"type" : "BOOL",
-			"value" : "OFF"
+			"type" : "INTERNAL",
+			"value" : "-I/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../include"
 		},
 		{
-			"name" : "LQ_NCNN_ROOT",
+			"name" : "NCNN_CFLAGS_I",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Path to target NCNN install root"
+					"value" : ""
 				}
 			],
-			"type" : "PATH",
+			"type" : "INTERNAL",
 			"value" : ""
 		},
 		{
-			"name" : "LQ_OPENCV_ROOT",
+			"name" : "NCNN_CFLAGS_OTHER",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Path to target OpenCV install root"
+					"value" : ""
 				}
 			],
-			"type" : "PATH",
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_FOUND",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "NCNN_INCLUDEDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../include"
+		},
+		{
+			"name" : "NCNN_INCLUDE_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../include"
+		},
+		{
+			"name" : "NCNN_LDFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-L/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../lib;-lncnn"
+		},
+		{
+			"name" : "NCNN_LDFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_LIBRARIES",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "ncnn"
+		},
+		{
+			"name" : "NCNN_LIBRARY_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../lib"
+		},
+		{
+			"name" : "NCNN_LIBS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_LIBS_L",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_LIBS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_LIBS_PATHS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_MODULE_NAME",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "ncnn"
+		},
+		{
+			"name" : "NCNN_PREFIX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../.."
+		},
+		{
+			"name" : "NCNN_STATIC_CFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-I/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../include"
+		},
+		{
+			"name" : "NCNN_STATIC_CFLAGS_I",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_CFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_INCLUDE_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../include"
+		},
+		{
+			"name" : "NCNN_STATIC_LDFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-L/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../lib;-lncnn"
+		},
+		{
+			"name" : "NCNN_STATIC_LDFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_LIBRARIES",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "ncnn"
+		},
+		{
+			"name" : "NCNN_STATIC_LIBRARY_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/ncnn_install/lib/pkgconfig/../../lib"
+		},
+		{
+			"name" : "NCNN_STATIC_LIBS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_LIBS_L",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_LIBS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_STATIC_LIBS_PATHS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_VERSION",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1.0.20260219"
+		},
+		{
+			"name" : "NCNN_ncnn_INCLUDEDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_ncnn_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_ncnn_PREFIX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "NCNN_ncnn_VERSION",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_CFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-I/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../include/opencv4"
+		},
+		{
+			"name" : "OPENCV_CFLAGS_I",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_CFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_FOUND",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "OPENCV_INCLUDEDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../include/opencv4"
+		},
+		{
+			"name" : "OPENCV_INCLUDE_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../include/opencv4"
+		},
+		{
+			"name" : "OPENCV_LDFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-L/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../lib;-lopencv_highgui;-lopencv_ml;-lopencv_objdetect;-lopencv_photo;-lopencv_stitching;-lopencv_video;-lopencv_calib3d;-lopencv_features2d;-lopencv_dnn;-lopencv_flann;-lopencv_videoio;-lopencv_imgcodecs;-lopencv_imgproc;-lopencv_core"
+		},
+		{
+			"name" : "OPENCV_LDFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../lib"
+		},
+		{
+			"name" : "OPENCV_LIBRARIES",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "opencv_highgui;opencv_ml;opencv_objdetect;opencv_photo;opencv_stitching;opencv_video;opencv_calib3d;opencv_features2d;opencv_dnn;opencv_flann;opencv_videoio;opencv_imgcodecs;opencv_imgproc;opencv_core"
+		},
+		{
+			"name" : "OPENCV_LIBRARY_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../lib"
+		},
+		{
+			"name" : "OPENCV_LIBS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_LIBS_L",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_LIBS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_LIBS_PATHS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_MODULE_NAME",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "opencv4"
+		},
+		{
+			"name" : "OPENCV_PREFIX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../.."
+		},
+		{
+			"name" : "OPENCV_STATIC_CFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-I/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../include/opencv4"
+		},
+		{
+			"name" : "OPENCV_STATIC_CFLAGS_I",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_CFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_INCLUDE_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../include/opencv4"
+		},
+		{
+			"name" : "OPENCV_STATIC_LDFLAGS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "-L/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../lib;-lopencv_highgui;-lopencv_ml;-lopencv_objdetect;-lopencv_photo;-lopencv_stitching;-lopencv_video;-lopencv_calib3d;-lopencv_features2d;-lopencv_dnn;-lopencv_flann;-lopencv_videoio;-lopencv_imgcodecs;-lopencv_imgproc;-lopencv_core;-ldl;-lm;-lpthread;-lrt"
+		},
+		{
+			"name" : "OPENCV_STATIC_LDFLAGS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBRARIES",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "opencv_highgui;opencv_ml;opencv_objdetect;opencv_photo;opencv_stitching;opencv_video;opencv_calib3d;opencv_features2d;opencv_dnn;opencv_flann;opencv_videoio;opencv_imgcodecs;opencv_imgproc;opencv_core;dl;m;pthread;rt"
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBRARY_DIRS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main/../tools/LQ_Dep_libs/opencv_install/lib/pkgconfig/../../lib"
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBS_L",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBS_OTHER",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_STATIC_LIBS_PATHS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_VERSION",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "4.10.0"
+		},
+		{
+			"name" : "OPENCV_opencv4_INCLUDEDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_opencv4_LIBDIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_opencv4_PREFIX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
+		},
+		{
+			"name" : "OPENCV_opencv4_VERSION",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
 			"value" : ""
 		},
 		{
@@ -1334,6 +2070,54 @@
 			"value" : "TRUE"
 		},
 		{
+			"name" : "__pkg_config_arguments_NCNN",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "REQUIRED;ncnn"
+		},
+		{
+			"name" : "__pkg_config_arguments_OPENCV",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "REQUIRED;opencv4"
+		},
+		{
+			"name" : "__pkg_config_checked_NCNN",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "__pkg_config_checked_OPENCV",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
 			"name" : "main_BINARY_DIR",
 			"properties" : 
 			[
@@ -1368,6 +2152,258 @@
 			],
 			"type" : "STATIC",
 			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/main"
+		},
+		{
+			"name" : "pkgcfg_lib_NCNN_ncnn",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/ncnn_install/lib/libncnn.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_calib3d",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_calib3d.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_core",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_core.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_dnn",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_dnn.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_features2d",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_features2d.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_flann",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_flann.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_highgui",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_highgui.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_imgcodecs",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_imgcodecs.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_imgproc",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_imgproc.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_ml",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_ml.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_objdetect",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_objdetect.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_photo",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_photo.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_stitching",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_stitching.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_video",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_video.so"
+		},
+		{
+			"name" : "pkgcfg_lib_OPENCV_opencv_videoio",
+			"properties" : 
+			[
+				{
+					"name" : "ADVANCED",
+					"value" : "1"
+				},
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/home/greenpia/WORKS/projects/Loongson_2k300_301_Library/Loongson_2K300_301_LIB/tools/LQ_Dep_libs/opencv_install/lib/libopencv_videoio.so"
+		},
+		{
+			"name" : "prefix_result",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : ""
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : ""
 		}
 	],
 	"kind" : "cache",

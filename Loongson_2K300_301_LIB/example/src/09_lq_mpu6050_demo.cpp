@@ -29,6 +29,6 @@ void lq_mpu6050_demo(void)
     {
         mpu6050.get_mpu6050_gyro(&ax, &ay, &az, &gx, &gy, &gz);
         printf("ID = 0x%02x, ax=%05d, ay=%05d, az=%05d, gx=%05d, gy=%05d, gz=%05d\n\n", mpu6050.get_mpu6050_id(), ax, ay, az, gx, gy, gz);
-        usleep(100*100);
+        usleep(100 * 100 * 10);
     }
 }

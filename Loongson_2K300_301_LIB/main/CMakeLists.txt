@@ -52,15 +52,25 @@ include_directories(
 # 查找 pkgconfig 工具（必须，用于解析 .pc 文件）
 find_package(PkgConfig REQUIRED)
 
+# 设置依赖库搜索路径，让 pkg-config 能找到 .pc 文件
+set(LQ_DEP_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../tools/LQ_Dep_libs")
+list(APPEND CMAKE_PREFIX_PATH
+    "${LQ_DEP_LIBS_DIR}/opencv_install"
+    "${LQ_DEP_LIBS_DIR}/ncnn_install"
+    "${LQ_DEP_LIBS_DIR}/ffmpeg_install"
+)
+
 # 查找 OpenCV 动态库
 pkg_check_modules(OPENCV REQUIRED opencv4)
+if(OPENCV_FOUND)
+    add_definitions(-DLQ_HAVE_OPENCV)
+endif()
 #message(STATUS "OpenCV library list: ${OpenCV_LIBS}")
 
 # 查找 ncnn 动态库
-
 pkg_check_modules(NCNN REQUIRED ncnn)
 if(NCNN_FOUND)
-    add_definitions(-DLQ_HAVE_OPENCV)
+    add_definitions(-DLQ_HAVE_NCNN)
 endif()
 
 # 查找 ffmpeg 动态库

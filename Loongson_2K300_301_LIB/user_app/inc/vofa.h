@@ -3,18 +3,20 @@
 
 #include "main.hpp"
 #include "lq_udp_client.hpp"
-
+// JustFloat 
 #define CH_COUNT 3 // 通道数量
 struct Frame
 {
     float fdata[CH_COUNT];
-    unsigned char tail[4]{0x00, 0x00, 0x80, 0x7f};
+    unsigned char tail[4] = {0x00, 0x00, 0x80, 0x7f};
 };
 
-#define VOFA_UDP_IP ""
+#define VOFA_UDP_IP "172.21.196.61"
 #define VOFA_UDP_PORT 1347
 
-extern lq_udp_client vofa;
+inline lq_udp_client vofa(VOFA_UDP_IP, VOFA_UDP_PORT);
+
+void vofa_send(float target_speed, float L_speed, float R_speed);
 
 #endif // __VOFA_H
 

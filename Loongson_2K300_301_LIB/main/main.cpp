@@ -26,15 +26,15 @@
 
 timeval start_time, end_time; // 时间戳（PERIODIC宏使用）
 float target_speed = 0.0f;    // 全局目标速度
-
+extern cv::Mat First_image;
 // ========================== 主函数 ==========================
 
 int main()
 {
-    printf("========================================\n");
-    printf("  智能车三环级联PID控制程序 (OOP架构)\n");
-    printf("  速度环(1ms) → 角速度环(2ms) → 图像环(5ms)\n");
-    printf("========================================\n");
+    // printf("========================================\n");
+    // printf("  智能车三环级联PID控制程序 (OOP架构)\n");
+    // printf("  速度环(1ms) → 角速度环(2ms) → 图像环(5ms)\n");
+    // printf("========================================\n");
 
     // ---- 创建小车运行时对象 ----
     CarRuntime car;
@@ -60,7 +60,7 @@ int main()
     sleep(2); // 等待摄像头稳定
 
     // ---- 定时器：调度三环 ----
-    lq_timer timer_1ms, timer_2ms, timer_5ms, timer_10ms;
+    lq_timer timer_1ms, timer_2ms, timer_5ms, timer_10ms, timer_1s;
 
     // 1ms: 速度环（Motor PID + PWM输出）
     timer_1ms.set_seconds_ms(1, [&car]()
@@ -77,14 +77,16 @@ int main()
     // 10ms: VOFA+ JustFloat 发送目标速度 & 实时编码器速度
     timer_10ms.set_seconds_ms(10, [&car]()
                               {
-        // float data[3];
-        // data[0] = car.get_target_speed();   // ch0: 目标速度
-        // data[1] = car.motor_->L_speed;     // ch1: 左轮实时速度（编码器）
-        // data[2] = car.motor_->R_speed;    // ch2: 右轮实时速度（编码器）
-        /* vofa_send_justfloat(data, 3);*/ });
+                                vofa_send(target_speed, car.get_left_speed(), car.get_right_speed());
+                            });
+    // timer_1s.set_seconds_s(1, [&car]()
+    //                       {
+    //                         printf("目标速度: %.2f, 左轮速度: %.2f, 右轮速度: %.2f\n",
+    //                                    target_speed, car.get_left_speed(), car.get_right_speed());
+    //                       });
 
     // ---- 主循环：持续捕获摄像头帧 ----
-    printf("智能车启动，按 Ctrl+C 安全退出...\n");
+    // printf("智能车启动，按 Ctrl+C 安全退出...\n");
 
     while (ls_system_running.load())
     {
@@ -108,7 +110,7 @@ int main()
     timer_2ms.stop();
     timer_5ms.stop();
     timer_10ms.stop();
-
+    timer_1s.stop();
     cap.release();
     cleanup();
 

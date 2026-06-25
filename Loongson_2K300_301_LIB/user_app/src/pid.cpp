@@ -328,26 +328,26 @@ void PID_init(PID *lmotor, PID *Rmotor, PID *angle, PD_FF *photo_ff, PID *photo)
     // 左电机速度环PID（位置式）
     Positional_PID_Init(lmotor,
                         18.0f, 1.65f, 1.0f,
-                        1000.0f, -700.0f, 700.0f);
+                        2000.0f, -2000.0f, 2000.0f); // PWM上限50% (ATIM_DUTY_MAX=10000)
 
     // 右电机速度环PID（位置式）
     Positional_PID_Init(Rmotor,
                         18.0f, 1.65f, 1.0f,
-                        1000.0f, -700.0f, 700.0f);
+                        2000.0f, -2000.0f, 2000.0f);
 
     // 角速度环PID（纯位置式，无前馈）
     Positional_PID_Init(angle,
-                        1.0f, 0.0f, 0.0f,
-                        1000.0f, -500.0f, 500.0f);
+                        2.0f, 0.1f, 0.5f,         // Kp, Ki, Kd
+                        500.0f, -300.0f, 300.0f); // 积分限幅, 输出限幅
 
     // 图像环/转向环 PD+前馈
     PD_FF_Init(photo_ff,
-               1.0f, 0.0f,     // Kp, Kd
-               0.0f, 0.0f,     // Kff, Kff_acc
-               500.0f, 10.0f); // 输出上限, 采样周期(ms)
+               5.0f, 2.0f,    // Kp, Kd
+               0.0f, 0.0f,    // Kff, Kff_acc
+               500.0f, 5.0f); // 输出上限, 采样周期(ms)
 
-    // 图像环PID（位置式，可与PD_FF配合使用）
+    // 图像环PID（位置式，与PD_FF配合提供转向修正）
     Positional_PID_Init(photo,
-                        1.0f, 0.0f, 0.0f,
-                        1000.0f, -1000.0f, 1000.0f);
+                        6.0f, 0.05f, 1.0f,        // Kp, Ki, Kd
+                        300.0f, -400.0f, 400.0f); // 积分限幅, 输出限幅
 }

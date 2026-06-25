@@ -100,9 +100,9 @@ void Motor::PID_Lmotor(float target)
     // PWM输出（输出已含符号，正=前进，负=后退）
     float out = Lmotor_PID.output;
     if (out < 0)
-        left_pwm_out(static_cast<int>(-out), true); // 后退
+        left_pwm_out(static_cast<int>(-out), !kLeftForwardDir); // 后退
     else
-        left_pwm_out(static_cast<int>(out), false); // 前进
+        left_pwm_out(static_cast<int>(out), kLeftForwardDir); // 前进
 }
 
 void Motor::PID_Rmotor(float target)
@@ -119,9 +119,9 @@ void Motor::PID_Rmotor(float target)
 
     float out = Rmotor_PID.output;
     if (out < 0)
-        right_pwm_out(static_cast<int>(-out), true);
+        right_pwm_out(static_cast<int>(-out), !kRightForwardDir);
     else
-        right_pwm_out(static_cast<int>(out), false);
+        right_pwm_out(static_cast<int>(out), kRightForwardDir);
 }
 
 // ========================== PWM输出 ==========================

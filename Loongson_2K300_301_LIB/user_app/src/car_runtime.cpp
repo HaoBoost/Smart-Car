@@ -60,8 +60,11 @@ void CarRuntime::init_hardware(bool enable_motor, int motor_init_duty)
     // 创建ImageSteering对象（图像环/转向环，PID + PD前馈）
     image_steering_ = std::make_unique<ImageSteering>(&Photo_PID, &Photo_PID_F);
 
-    // 初始化速度决策
-    target_speed_ = 300.0f; // 默认基础速度
+    // 创建SpeedDecision对象（根据赛道元素决策目标速度）
+    speed_decision_ = std::make_unique<SpeedDecision>();
+
+    // 初始默认速度 → 写入全局 target_speed（速度决策核心变量）
+    target_speed = speed_decision_->decide_target_speed();
 
     running_ = true;
 }
@@ -73,7 +76,7 @@ void CarRuntime::on_timer_1ms()
     // 速度环：1ms周期
     if (motor_ && motor_->is_initialized())
     {
-        motor_->Motor_proc(target_speed_, diff_speed_);
+        motor_->Motor_proc(target_speed, diff_speed_);
     }
 }
 
@@ -88,9 +91,18 @@ void CarRuntime::on_timer_2ms()
 
 void CarRuntime::on_timer_5ms()
 {
-    // 图像环：5ms周期
-    // 先执行图像处理（更新ImageStatus等全局状态）
+    // 刷新全局时间戳（ImageProcess内部PERIODIC宏依赖end_time，
+    // 定时器线程中必须显式更新，否则PERIODIC永远return跳过图像处理）
+    gettimeofday(&end_time, nullptr);
+
+    // 先执行图像处理（更新ImageStatus等全局状态，包括Road_type）
     ImageProcess();
+
+    // 根据当前赛道元素决策目标速度 → 写入全局 target_speed
+    if (speed_decision_)
+    {
+        target_speed = speed_decision_->decide_target_speed();
+    }
 
     // 再执行图像环PID（计算中线偏差 → 输出目标角速度）
     if (image_steering_)
@@ -103,13 +115,15 @@ void CarRuntime::on_timer_5ms()
 
 float CarRuntime::get_left_speed() const
 {
-    if (motor_) return motor_->L_speed;
+    if (motor_)
+        return motor_->L_speed;
     return 0.0f;
 }
 
 float CarRuntime::get_right_speed() const
 {
-    if (motor_) return motor_->R_speed;
+    if (motor_)
+        return motor_->R_speed;
     return 0.0f;
 }
 
