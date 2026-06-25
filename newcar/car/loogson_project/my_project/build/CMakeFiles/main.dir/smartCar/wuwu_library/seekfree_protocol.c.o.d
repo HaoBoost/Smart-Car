@@ -1,0 +1,26 @@
+CMakeFiles/main.dir/smartCar/wuwu_library/seekfree_protocol.c.o: \
+ /home/wuwu/my_project/smartCar/wuwu_library/seekfree_protocol.c \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/stdc-predef.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/string.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/libc-header-start.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/features.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/features-time64.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/wordsize.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/timesize.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/sys/cdefs.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/long-double.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/gnu/stubs.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/gnu/stubs-lp64d.h \
+ /opt/loongson-gnu-toolchain-13.2/lib/gcc/loongarch64-unknown-linux-gnu/13.2.0/include/stddef.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/types/locale_t.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/types/__locale_t.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/strings.h \
+ /home/wuwu/my_project/smartCar/include/seekfree_protocol.h \
+ /opt/loongson-gnu-toolchain-13.2/lib/gcc/loongarch64-unknown-linux-gnu/13.2.0/include/stdint.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/stdint.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/types.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/typesizes.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/time64.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/wchar.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/stdint-intn.h \
+ /opt/loongson-gnu-toolchain-13.2/target/usr/include/bits/stdint-uintn.h

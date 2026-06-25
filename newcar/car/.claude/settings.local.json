@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf build)",
+      "Bash(bash build.sh)",
+      "Bash(make -j4)",
+      "Bash(pip --version)",
+      "Bash(python3 -m pip --version)",
+      "Bash(python3 -m ensurepip --user)",
+      "Bash(sudo -S apt-get update -qq)",
+      "Bash(sudo -S apt-get install -y -qq build-essential cmake git wget pkg-config libopencv-dev v4l-utils)",
+      "Bash(pkg-config --modversion opencv4)"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+# 透视变换标定结果
+# 复制以下内容到 generate_persp_lut.py
+
+CALIB_SIZE = (160, 120)
+SRC_PTS = np.float32([[43.5, 65.0], [124.0, 69.0], [102.0, 32.5], [63.5, 32.5]])
+DST_PTS = np.float32([[56.0, 100.0], [104.0, 100.0], [104.0, 46.0], [56.0, 46.0]])
+
+# 调整参数
+translate_x = 0
+translate_y = 8
+scale_factor = 0.6

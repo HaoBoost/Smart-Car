@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i '1401s/ImageFlag.image_element_rings_flag = -40;  \\\\/\\\\/ 40帧冷却期，防止出口误检/ImageFlag.image_element_rings_flag = 0;/' image.cpp)",
+      "Bash(sed -i '1404d' image.cpp)",
+      "Bash(sed -i '1672s/.*CirqueOff.*//' image.cpp)",
+      "Bash(sed -i '1671d' image.cpp)",
+      "Bash(sed -i '1821,1827d' image.cpp)"
+    ]
+  }
+}

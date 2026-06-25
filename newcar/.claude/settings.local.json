@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/calib_persp.py /home/china/newcar/car/snapshot_main_20210324_105334.png)"
+    ]
+  }
+}

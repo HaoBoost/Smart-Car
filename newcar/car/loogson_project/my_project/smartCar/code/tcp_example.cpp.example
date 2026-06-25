@@ -1,0 +1,308 @@
+/*********************************************************************************************************************
+ * TCP 通信完整示例
+ *
+ * 功能：
+ * 1. 连接 VOFA+ 上位机
+ * 2. 实时发送电机速度、巡线数据、PID 调试信息
+ * 3. 演示错误处理和自动重连
+ *
+ * 使用方法：
+ * 1. 修改 VOFA_SERVER_IP 为你的 PC IP 地址
+ * 2. 在 PC 上启动 VOFA+，选择 TCP Server 模式，端口 2233
+ * 3. 编译并运行本程序
+ * 4. 在 VOFA+ 中选择 FireWater 协议，观察波形
+ ********************************************************************************************************************/
+
+#include "headfile.h"
+#include "line_track.h"
+#include "ww_tcp_client.h"
+
+// ==================== 配置参数 ====================
+#define VOFA_SERVER_IP      "192.168.1.100"  // 修改为你的 PC IP
+#define VOFA_SERVER_PORT    2233
+#define DEBUG_SEND_FREQ_MS  20               // 发送频率：50Hz
+
+// ==================== 全局变量 ====================
+VofaClient vofa;
+bool vofa_connected = false;
+
+// ==================== 示例1：基础用法 ====================
+void example1_basic_usage() {
+    printf("=== 示例1：基础 TCP 通信 ===\n");
+
+    // 创建 TCP 客户端
+    TcpClient tcp;
+
+    // 连接服务器
+    if (tcp.connect_server("192.168.1.100", 8080) < 0) {
+        printf("连接失败\n");
+        return;
+    }
+
+    // 发送字符串
+    tcp.send_string("Hello, TCP Server!");
+
+    // 发送原始数据
+    float data[] = {1.0f, 2.0f, 3.0f};
+    tcp.send_bytes(data, sizeof(data));
+
+    // 断开连接
+    tcp.disconnect_server();
+}
+
+// ==================== 示例2：VOFA+ 波形显示 ====================
+void example2_vofa_waveform() {
+    printf("=== 示例2：VOFA+ 波形显示 ===\n");
+
+    VofaClient vofa;
+
+    // 连接 VOFA+
+    if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) < 0) {
+        printf("VOFA+ 连接失败\n");
+        return;
+    }
+
+    // 模拟发送正弦波数据
+    for (int i = 0; i < 1000; i++) {
+        float t = i * 0.01f;
+        float sin_val = sin(t);
+        float cos_val = cos(t);
+
+        // 发送到 VOFA+ 显示波形
+        vofa.send_firewater("wave: %.3f, %.3f\n", sin_val, cos_val);
+
+        usleep(10000);  // 10ms
+    }
+
+    vofa.disconnect_server();
+}
+
+// ==================== 示例3：电机速度调试 ====================
+void example3_motor_debug(Motor& motor) {
+    printf("=== 示例3：电机速度调试 ===\n");
+
+    VofaClient vofa;
+
+    if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) < 0) {
+        printf("VOFA+ 连接失败\n");
+        return;
+    }
+
+    // 实时发送电机速度
+    for (int i = 0; i < 500; i++) {
+        motor.update_encoders();
+
+        float spd_l = -motor.encoder1_counts * 12.2f;
+        float spd_r = -motor.encoder2_counts * 12.2f;
+
+        // 发送到 VOFA+ 观察速度曲线
+        vofa.send_firewater("motor: %.2f, %.2f\n", spd_l, spd_r);
+
+        usleep(20000);  // 20ms (50Hz)
+    }
+
+    vofa.disconnect_server();
+}
+
+// ==================== 示例4：PID 调试 ====================
+void example4_pid_debug(Motor& motor, int target_speed) {
+    printf("=== 示例4：PID 调试 ===\n");
+
+    VofaClient vofa;
+
+    if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) < 0) {
+        printf("VOFA+ 连接失败\n");
+        return;
+    }
+
+    // 模拟 PID 控制循环
+    for (int i = 0; i < 500; i++) {
+        motor.update_encoders();
+
+        float actual_speed = -motor.encoder1_counts * 12.2f;
+        float error = target_speed - actual_speed;
+        float pid_output = 0.0f;  // 假设这是 PID 输出
+
+        // 发送 PID 调试数据到 VOFA+
+        // 可以观察：目标值、实际值、误差、输出
+        vofa.send_firewater("pid: %.2f, %.2f, %.2f, %.2f\n",
+            (float)target_speed, actual_speed, error, pid_output);
+
+        usleep(10000);  // 10ms (100Hz)
+    }
+
+    vofa.disconnect_server();
+}
+
+// ==================== 示例5：巡线数据调试 ====================
+void example5_vision_debug() {
+    printf("=== 示例5：巡线数据调试 ===\n");
+
+    VofaClient vofa;
+
+    if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) < 0) {
+        printf("VOFA+ 连接失败\n");
+        return;
+    }
+
+    // 实时发送巡线数据
+    for (int i = 0; i < 500; i++) {
+        // 假设这些是全局变量（来自 line_track.h）
+        extern int g_ipts0_num, g_ipts1_num, g_rptsn_num;
+        extern float g_pure_angle;
+
+        // 发送巡线数据到 VOFA+
+        vofa.send_firewater("vision: %d, %d, %d, %.2f\n",
+            g_ipts0_num,      // 左边线点数
+            g_ipts1_num,      // 右边线点数
+            g_rptsn_num,      // 中线点数
+            g_pure_angle);    // 航向角误差
+
+        usleep(50000);  // 50ms (20Hz)
+    }
+
+    vofa.disconnect_server();
+}
+
+// ==================== 示例6：自动重连机制 ====================
+void debug_task_with_reconnect(void* arg) {
+    printf("=== 示例6：自动重连机制 ===\n");
+
+    while (1) {
+        // 检查连接状态
+        if (!vofa.is_connected()) {
+            printf("VOFA+ 未连接，尝试重连...\n");
+
+            if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) == 0) {
+                printf("VOFA+ 重连成功\n");
+                vofa_connected = true;
+            } else {
+                printf("VOFA+ 重连失败，5秒后重试\n");
+                vofa_connected = false;
+                sleep(5);
+                continue;
+            }
+        }
+
+        // 发送调试数据
+        extern Motor motor;
+        motor.update_encoders();
+
+        float spd_l = -motor.encoder1_counts * 12.2f;
+        float spd_r = -motor.encoder2_counts * 12.2f;
+
+        vofa.send_firewater("motor: %.2f, %.2f\n", spd_l, spd_r);
+
+        usleep(DEBUG_SEND_FREQ_MS * 1000);
+    }
+}
+
+// ==================== 示例7：多数据源发送 ====================
+void example7_multi_data_source() {
+    printf("=== 示例7：多数据源发送 ===\n");
+
+    VofaClient vofa;
+
+    if (vofa.connect_server(VOFA_SERVER_IP, VOFA_SERVER_PORT) < 0) {
+        printf("VOFA+ 连接失败\n");
+        return;
+    }
+
+    extern Motor motor;
+    extern int g_ipts0_num, g_ipts1_num;
+    extern float g_pure_angle;
+
+    for (int i = 0; i < 500; i++) {
+        motor.update_encoders();
+
+        // 发送电机数据
+        float spd_l = -motor.encoder1_counts * 12.2f;
+        float spd_r = -motor.encoder2_counts * 12.2f;
+        vofa.send_firewater("motor: %.2f, %.2f\n", spd_l, spd_r);
+
+        // 发送巡线数据
+        vofa.send_firewater("vision: %d, %d, %.2f\n",
+            g_ipts0_num, g_ipts1_num, g_pure_angle);
+
+        // 发送 PID 数据
+        extern float g_pwm_l, g_pwm_r;
+        vofa.send_firewater("pwm: %.2f, %.2f\n", g_pwm_l, g_pwm_r);
+
+        usleep(20000);  // 20ms
+    }
+
+    vofa.disconnect_server();
+}
+
+// ==================== 集成到 main.cc 的示例 ====================
+/*
+// 在 main.cc 中添加以下代码：
+
+#include "ww_tcp_client.h"
+
+// 全局 VOFA 客户端
+VofaClient g_vofa;
+bool g_vofa_enabled = false;  // 可通过菜单控制
+
+// 调试任务（独立线程）
+void vofa_debug_task(void* arg) {
+    while (1) {
+        if (!g_vofa_enabled) {
+            usleep(100000);  // 100ms
+            continue;
+        }
+
+        // 检查连接
+        if (!g_vofa.is_connected()) {
+            if (g_vofa.connect_server("192.168.1.100", 2233) < 0) {
+                usleep(5000000);  // 5秒后重试
+                continue;
+            }
+        }
+
+        // 发送调试数据
+        motor.update_encoders();
+        float spd_l = -motor.encoder1_counts * 12.2f;
+        float spd_r = -motor.encoder2_counts * 12.2f;
+
+        g_vofa.send_firewater("motor: %.2f, %.2f, %.2f, %d, %d\n",
+            spd_l, spd_r, g_pure_angle,
+            g_ipts0_num, g_ipts1_num);
+
+        usleep(20000);  // 50Hz
+    }
+}
+
+int main() {
+    // ... 初始化硬件 ...
+
+    // 启动 VOFA 调试线程（可选）
+    TimerThread vofa_thread(vofa_debug_task, NULL, 20);
+    vofa_thread.start();
+
+    // 在菜单中添加开关
+    menu.add_item("VOFA", &g_vofa_enabled, 0, 1, 1);
+
+    // ... 主循环 ...
+}
+*/
+
+// ==================== 主函数（测试用） ====================
+int main() {
+    printf("TCP 通信示例程序\n");
+    printf("请选择示例：\n");
+    printf("1. 基础 TCP 通信\n");
+    printf("2. VOFA+ 波形显示\n");
+    printf("3. 电机速度调试\n");
+    printf("4. PID 调试\n");
+    printf("5. 巡线数据调试\n");
+    printf("6. 自动重连机制\n");
+    printf("7. 多数据源发送\n");
+
+    // 根据需要调用对应的示例函数
+    // example1_basic_usage();
+    // example2_vofa_waveform();
+    // ...
+
+    return 0;
+}

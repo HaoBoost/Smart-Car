@@ -1,0 +1,56 @@
+/*********************************************************************************************************************
+ * LCD 菜单使用示例
+ *
+ * 功能：在 main.cc 中集成菜单系统，实现参数调节
+ ********************************************************************************************************************/
+
+#include "headfile.h"
+#include "ww_menu.h"
+
+// 全局菜单指针（供按键回调使用）
+Menu* g_menu = nullptr;
+
+// 需要调节的参数
+int speed_target = 1000;
+float pid_kp = 1.0f;
+float pid_ki = 0.0f;
+float pid_kd = 0.0f;
+
+int main() {
+    // 初始化硬件
+    LCD lcd;
+    Key key;
+    if (lcd.lcd_init() < 0) return -1;
+    if (key.key_init() < 0) return -1;
+
+    // 创建菜单
+    Menu menu(&lcd);
+    g_menu = &menu;  // 设置全局指针
+
+    // 添加菜单项
+    menu.add_item("Speed", &speed_target, 0, 3000, 100);      // 速度：0-3000，步长100
+    menu.add_item("Kp", &pid_kp, 0.0f, 10.0f, 0.1f);          // Kp：0-10，步长0.1
+    menu.add_item("Ki", &pid_ki, 0.0f, 5.0f, 0.05f);          // Ki：0-5，步长0.05
+    menu.add_item("Kd", &pid_kd, 0.0f, 5.0f, 0.05f);          // Kd：0-5，步长0.05
+
+    // 首次显示菜单
+    menu.refresh();
+
+    // 启动按键监听线程
+    TimerThread key_thread([](void* arg) {
+        Key* k = (Key*)arg;
+        k->key_listeners();
+    }, &key, 0);
+    key_thread.start();
+
+    // 主循环
+    while (1) {
+        // 这里可以使用调节后的参数
+        // 例如：motor.set_speed(speed_target);
+        //      pid.kp = pid_kp;
+
+        usleep(100000);  // 100ms
+    }
+
+    return 0;
+}
