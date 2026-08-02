@@ -36,6 +36,8 @@
 
 int main()
 {
+    lq_tft18_show_img_demo();
+
     while (ls_system_running.load())
     {
         usleep(100 * 1000);
