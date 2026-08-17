@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)    # 限制最低CMake版本
 
+# 开关定义：1 启用 Aprilag，0 禁用 AprilTag
+set(ENABLE_APRILTAG 0 CACHE BOOL "是否启用 AprilTag 功能")
+
 # 设置交叉编译工具路径
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/toolchain_path.cmake")
     include("${CMAKE_CURRENT_SOURCE_DIR}/toolchain_path.cmake")
@@ -75,6 +78,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     pthread
     ${NCNN_LDFLAGS}
     ${OPENCV_LDFLAGS}
-    ${APRILTAG_LDFLAGS}
     # ${FFMPEG_LDFLAGS}
 )
+
+# 根据前面条件决定是否添加 apriltag 库和宏定义
+if (ENABLE_APRILTAG)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${APRILTAG_LDFLAGS} )
+    # 传给 C/C++ 源码：#define ENABLE_APRILTAG=1
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_APRILTAG=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_APRILTAG=0)
+endif()
