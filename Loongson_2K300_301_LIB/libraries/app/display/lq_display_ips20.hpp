@@ -15,6 +15,9 @@
  * @brief   宏定义
  ****************************************************************************************************/
 
+/* 汉字编码格式，默认 1 是 UTF-8 格式, 给 0 则表示 GB2312 格式 */
+#define IPS20_HANZI_UTF_8   1
+
 /* 文件名称 */
 #define IPS20_DEV_NAME      ( "/dev/LQ_IPS_ST7789" )
 
@@ -54,7 +57,9 @@ void lq_ips20_drv_p6x8_str (uint16_t x, uint16_t y, const char *s_dat, lq_displa
 void lq_ips20_drv_p8x8_str (uint16_t x, uint16_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color);   // 液晶字符串输出(8*8字体)
 void lq_ips20_drv_p8x16_str(uint16_t x, uint16_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color);   // 液晶字符串输出(8*16字体)
 
-void lq_ips20_drv_p16x16_cstr(uint16_t x, uint16_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color); // 液晶字符串输出(16*16字体)
+void lq_ips20_drv_cstr(uint8_t x, uint8_t y, const char *s_dat, const lq_display_font_t &font, lq_display_color_t word_color, lq_display_color_t back_color);    // 根据传入的字库，显示任意大小的汉字
+
+void lq_ips20_drv_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const unsigned char* Pixle);    // 显示图像取模软件获取的图像数据
 
 void lq_ips20_drv_road   (uint16_t wide_start, uint16_t high_start, uint16_t high, uint16_t wide, uint8_t *Pixle);  // 绘制灰度图像
 void lq_ips20_drv_binRoad(uint16_t wide_start, uint16_t high_start, uint16_t high, uint16_t wide, uint8_t *Pixle);  // 绘制二值图像

@@ -1,6 +1,7 @@
 #include "lq_display_ips20.hpp"
 #include "lq_assert.hpp"
 #include "lq_common.hpp"
+#include "lq_drv_inc.hpp"
 
 /* 屏幕初始化结构体 */
 static spi_display_t ips20_spi;
@@ -403,56 +404,124 @@ void lq_ips20_drv_p8x16_str(uint16_t x, uint16_t y, const char *s_dat, lq_displa
 }
 
 /********************************************************************************
- * @brief    液晶汉字字符串输出(16*16字体)
- * @param    x: 0 - 7	(行)
- * @param    y: 0 - 9	(列)
- * @param    word_color: 字体颜色
- * @param    back_color: 背景颜色
+ * @brief    取模图片数据显示
+ * @param    x: 图片左上角起始坐标
+ * @param    y: 图片左上角起始坐标
+ * @param    w: 图片宽度
+ * @param    h: 图片高度
+ * @param    Pixle: 图片数据
  * @return   无
- * @note     汉字只能是字库里的 字库没有的需要自行添加
- * @see      lq_ips20_drv_p16x16_cstr(1, 1, "123456", U16YELLOW, U16RED);
+ * @see      lq_ips20_drv_image(0, 0, 100, 63, gImage_2);
  ********************************************************************************/
-void lq_ips20_drv_p16x16_cstr(uint16_t x, uint16_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color)
+void lq_ips20_drv_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const unsigned char* Pixle)
 {
-    uint16_t wm = 0, ii = 0, i, j;
-    int adder = 1;
-    while (s_dat[ii] != '\0')
+    if (Pixle == NULL) {return;}
+
+    uint16_t color;
+    for (uint8_t i = 0; i < h; i++)
     {
-        wm = 0;
-        adder = 1;
-        while (hanzi_Idx[wm] > 127)
+        for (uint8_t j = 0; j < w; j++)
         {
-            if (hanzi_Idx[wm] == (uint8_t)s_dat[ii])
+            if (j+x >= ips20_spi.width) break;
+
+            color = (Pixle[(i*w + j)*2  + 1] << 8) | Pixle[(i*w + j)*2];
+            lq_ips20_drv_data_mod(j+x, i+y, (lq_display_color_t)color);
+        }
+        if (i+y >= ips20_spi.height) break;
+    }
+    ioctl(ips20_spi.fd, IOCTL_IPS20_FLUSH);
+}
+
+/********************************************************************************
+ * @brief    汉字显示
+ * @param    x     : 汉字左上角起始坐标
+ * @param    y     : 汉字左上角起始坐标
+ * @param    s_dat : 汉字字符串
+ * @param    font  : 字库结构体
+ * @param    word_color : 字体颜色
+ * @param    back_color : 背景颜色
+ * @return   无
+ * @example  
+ *          lq_display_font_t ssss = {
+ *              .font_idx = tfont_Idx,              // 中文索引
+ *              .font_data = tfont_32x32,           // 中文字库
+ *              .font_size = sizeof(tfont_32x32)    // 字库长度
+ *          };
+ *          lq_ips20_drv_cstr(0, 120, "龙邱科技", ssss, U16RED, U16PURPLE);
+ * @note     注意使用该函数前一定要检查字库是否包含了要显示的汉字，以及字库是否格式正确
+ ********************************************************************************/
+void lq_ips20_drv_cstr(uint8_t x, uint8_t y, const char *s_dat, const lq_display_font_t &font, lq_display_color_t word_color, lq_display_color_t back_color)
+{
+    // ========== 字库合法性校验，防止崩溃 ==========
+    if(s_dat == nullptr || font.font_idx == nullptr || font.font_data == nullptr || font.font_size < 10U) return;
+
+#if IPS20_HANZI_UTF_8
+    uint8_t hanzi_len = 3;
+#else
+    uint8_t hanzi_len = 2;
+#endif
+
+    unsigned char wm = 0;       // 字库索引数组当前索引值
+    unsigned char ii = 0;       // 当前准备显示的是第几个字符
+
+    uint16_t ls = 0;            // 显示到第几个像素点
+
+    int adder = 1;              // 当前显示像素点在字库中的偏移量
+
+    uint16_t hanzi_num = font.font_data[8] << 8 | font.font_data[9];    // 字库中汉字总数
+    uint16_t all_num = font.font_size - 10;                             // 字库中汉字总数据量
+
+    uint16_t english_w = font.font_data[4] << 8 | font.font_data[5];        // 字库中英文字符宽度
+    uint16_t english_h = font.font_data[6] << 8 | font.font_data[7];        // 字库中英文字符高度
+
+    english_w = (english_w == 6) ? 12 : ((all_num / english_h) * 2);
+
+    while ((s_dat[ii] != '\0') && (ls_system_running.load()))
+    {
+        // 保护：输入字符串字节不足直接退出
+    #if IPS20_HANZI_UTF_8
+        if(s_dat[ii+1] == '\0' || s_dat[ii+2] == '\0') break;
+    #else
+        if(s_dat[ii+1] == '\0') break;
+    #endif
+
+        wm = 0U;
+        adder = 1U;
+        while ((font.font_idx[wm] > 127) && (ls_system_running.load()))
+        {
+            if ((font.font_idx[wm] == (uint8_t)s_dat[ii]) && (font.font_idx[wm+1] == (uint8_t)s_dat[ii+1]))
             {
-                if (hanzi_Idx[wm + 1] == s_dat[ii + 1])
+            #if IPS20_HANZI_UTF_8
+                if (font.font_idx[wm+2] == (uint8_t)s_dat[ii+2])
+            #endif
                 {
-                    adder = wm * 16;
+                    adder = (wm / hanzi_len) * (all_num / hanzi_num);
                     break;
                 }
             }
-            wm += 2;
+            wm += hanzi_len;
         }
-
-        if (adder != 1) // 显示汉字s
+        if (adder != 1U) // 显示汉字
         {
-            for (j = 0; j < 32; j++)
+            ls = 0;
+            for (uint16_t i = 0; i < (all_num / hanzi_num); i++)
             {
-                for (i = 0; i < 8; i++)
+                uint8_t poll = (english_w == 12 && (i & 1)) ? 4 : 8;
+                for (uint8_t k = 0; k < poll; k++)
                 {
-                    if ((hanzi16x16[adder]) & (0x80 >> i))
+                    uint16_t user_x = x + (english_w * (ii / hanzi_len)) + (ls % english_w);
+                    uint16_t user_y = y + ls / english_h;
+                    
+                    if ((user_x < ips20_spi.width) && (user_y < ips20_spi.height))
                     {
-                        lq_ips20_drv_data_mod(x * 16 + i + (j % 2) * 8, y * 16 + (j / 2), word_color);
+                        lq_ips20_drv_data_mod(user_x, user_y, (font.font_data[adder + 10] & (0x80U >> k)) ? word_color : back_color);
                     }
-                    else
-                    {
-                        lq_ips20_drv_data_mod(x * 16 + i + (j % 2) * 8, y * 16 + (j / 2), back_color);
-                    }
+                    ls++;
                 }
-                adder += 1;
+                adder++;
             }
         }
-        x  += 1;
-        ii += 2;
+        ii += hanzi_len;
     }
     ioctl(ips20_spi.fd, IOCTL_IPS20_FLUSH);
 }

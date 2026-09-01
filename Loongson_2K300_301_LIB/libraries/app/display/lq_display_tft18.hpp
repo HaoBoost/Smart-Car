@@ -16,6 +16,9 @@
  * @brief   宏定义
  ****************************************************************************************************/
 
+/* 汉字编码格式，默认 1 是 UTF-8 格式, 给 0 则表示 GB2312 格式 */
+#define TFT18_HANZI_UTF_8   1
+
 /* 文件名称 */
 #define TFT18_DEV_NAME      ( "/dev/LQ_TFT_1.8" )
 
@@ -53,7 +56,9 @@ void lq_tft18_drv_p6x8_str (uint8_t x, uint8_t y, const char *s_dat, lq_display_
 void lq_tft18_drv_p8x8_str (uint8_t x, uint8_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color);     // 显示P8X8字符
 void lq_tft18_drv_p8x16_str(uint8_t x, uint8_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color);     // 显示P8X16字符
 
-void lq_tft18_drv_p16x16_cstr(uint8_t x, uint8_t y, const char *s_dat, lq_display_color_t word_color, lq_display_color_t back_color);   // 显示P16X16汉字
+void lq_tft18_drv_cstr(uint8_t x, uint8_t y, const char *s_dat, const lq_display_font_t &font, lq_display_color_t word_color, lq_display_color_t back_color);    // 根据传入的字库，显示任意大小的汉字
+
+void lq_tft18_drv_image(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const unsigned char* Pixle);    // 显示图像取模软件获取的图像数据
 
 void lq_tft18_drv_road   (uint8_t wide_start, uint8_t high_start, uint8_t high, uint8_t wide, uint8_t *Pixle); // 显示灰度图
 void lq_tft18_drv_binroad(uint8_t wide_start, uint8_t high_start, uint8_t high, uint8_t wide, uint8_t *Pixle); // 显示二值图

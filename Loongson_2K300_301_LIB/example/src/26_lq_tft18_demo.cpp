@@ -21,14 +21,38 @@ void lq_tft18_demo()
 {
     lq_tft18_drv_init(1);
 
+    lq_tft18_drv_cls(U16WHITE);
+
+    // 显示中文
+    lq_display_font_t ssss = {
+        .font_idx = tfont_Idx,              // 中文索引
+        .font_data = tfont_16x16,           // 中文字库
+        .font_size = sizeof(tfont_16x16)    // 字库长度
+    };
+    lq_tft18_drv_cstr(0, 120, "龙邱科技", ssss, U16RED, U16PURPLE);
+
     while (ls_system_running.load()) {
+        // 全屏蓝色
         lq_tft18_drv_cls(U16BLUE);
         sleep(1);
+
+        // 画矩形区域
         lq_tft18_drv_fill_area(10, 20, 30, 40, U16YELLOW);
         sleep(1);
+
+        // 画线
         lq_tft18_drv_draw_line(10, 20, 30, 40, U16RED);
         sleep(1);
+
+        // 画圆
         lq_tft18_drv_draw_circle(50, 50, 30, U16BLACK);
+        sleep(1);
+
+        // 写中文字符
+        lq_tft18_drv_cstr(0, 120, "龙邱科技", ssss, U16RED, U16PURPLE);
+        
+        // 显示图片
+        lq_tft18_drv_image(10, 10, 100, 80, gImage_2);        
         sleep(1);
     }
 }
