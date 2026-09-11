@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <memory>
 #include <mutex>
+#include <cstring>
+#include <cerrno>
 
 /****************************************************************************************************
  * @brief   类定义
@@ -36,15 +38,17 @@ public:
 
     void tcp_close() noexcept;                          // 主动关闭TCP套接字
 
-private:
     bool is_connected() const noexcept;                 // 检查连接是否有效
+
+    bool tcp_check_alive();                             // 检测服务器是否仍然连接
+
+    bool tcp_reconnect();                               // 重新连接服务器
 
 private:
     int                  socket_fd_;    // 套接字文件描述符
     std::string          ip_;           // 服务器IP地址
     uint16_t             port_;         // 端口号
     mutable std::mutex   mtx_;          // 互斥锁，用于保护socket_fd_
-
 };
 
 #endif
