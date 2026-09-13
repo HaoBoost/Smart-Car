@@ -8,7 +8,7 @@
  * @example lq_tcp_client MyClient;
  * @note    none.
  ********************************************************************************/
-lq_tcp_client::lq_tcp_client() noexcept : socket_fd_(-1)
+lq_tcp_client::lq_tcp_client() noexcept : socket_fd_(-1), port_(0)
 {
 }
 
@@ -184,4 +184,88 @@ void lq_tcp_client::tcp_close() noexcept
 bool lq_tcp_client::is_connected() const noexcept
 {
     return this->socket_fd_ >= 0;
+}
+
+/********************************************************************************
+ * @brief   检测服务器是否仍然连接.
+ * @param   none.
+ * @return  bool, 有效返回 true,无效返回 false.
+ * @example bool is_connected = MyClient.is_connected();
+ * @note    none.
+ ********************************************************************************/
+bool lq_tcp_client::tcp_check_alive()
+{
+    std::lock_guard<std::mutex> lock(this->mtx_);
+    
+    if (this->socket_fd_ < 0) {
+        return false;
+    }
+
+    // 使用 select 检测 socket 是否有可读事件(超时世界爱你为 0, 非阻塞)
+    fd_set read_fds;
+    struct timeval timeout;
+
+    FD_ZERO(&read_fds);
+    FD_SET(this->socket_fd_, &read_fds);
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+
+    int ret = select(this->socket_fd_ + 1, &read_fds, nullptr, nullptr, &timeout);
+    if (ret < 0) {
+        // select出错, 连接已断开
+        lq_log_error("select出错, 连接断开, errno: %d", errno);
+        close(this->socket_fd_);
+        this->socket_fd_ = -1;
+        return false;
+    }
+    if (ret > 0 && FD_ISSET(this->socket_fd_, &read_fds)) {
+        // 有可读事件, 尝试接收数据来判断是断开还是有数据
+        char buf[1];
+        ssize_t recv_ret = recv(this->socket_fd_, buf, 1, MSG_PEEK | MSG_DONTWAIT);
+        if (recv_ret == 0) {
+            // recv返回0表示对端正常关闭连接
+            lq_log_info("连接已关闭");
+            close(this->socket_fd_);
+            this->socket_fd_ = -1;
+            return false;
+        } else if (recv_ret < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // 没有数据可读, 但连接仍然存活
+                return true;
+            }
+            // 其他错误, 连接已断开
+            lq_log_error("读取失败, 连接断开, errno: %d", errno);
+            close(this->socket_fd_);
+            this->socket_fd_ = -1;
+            return false;
+        }
+        // 有数据可读, 连接正常
+        return true;
+    }
+    // 没有可读事件, 连接仍然存活
+    return true;
+}
+
+/********************************************************************************
+ * @brief   重新连接服务器.
+ * @param   none.
+ * @return  bool, 重连成功返回 true, 失败返回 false.
+ * @example bool ok = MyClient.tcp_reconnect();
+ * @note    需要之前已经成功连接过(有ip和port记录).
+ ********************************************************************************/
+bool lq_tcp_client::tcp_reconnect()
+{
+    // 检查是否有服务器地址信息
+    if (this->ip_.empty() || this->port_ == 0) {
+        lq_log_error("没有可用的服务器地址信息，无法重新连接");
+        return false;
+    }
+
+    // 关闭旧的socket
+    this->tcp_close();
+
+    // 重新初始化连接
+    this->tcp_client_init(this->ip_, this->port_);
+
+    return this->is_connected();
 }

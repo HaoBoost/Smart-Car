@@ -34,4 +34,12 @@ typedef struct spi_display
     int       fd;       // 文件描述符
 } spi_display_t;
 
+/* 字符显示结构体 */
+typedef struct lq_display_font
+{
+    const unsigned char *font_idx;    // 字体索引 (主要用于汉字)
+    const unsigned char *font_data;   // 字体数据
+    uint16_t             font_size;   // 字体数据数组的大小
+} lq_display_font_t;
+
 #endif

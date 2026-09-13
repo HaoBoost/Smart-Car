@@ -76,9 +76,7 @@ int main()
 
     // 10ms: VOFA+ JustFloat 发送目标速度 & 实时编码器速度
     timer_10ms.set_seconds_ms(10, [&car]()
-                              {
-                                vofa_send(target_speed, car.get_left_speed(), car.get_right_speed());
-                            });
+                              { vofa_send(target_speed, car.get_left_speed(), car.get_right_speed()); });
     // timer_1s.set_seconds_s(1, [&car]()
     //                       {
     //                         printf("目标速度: %.2f, 左轮速度: %.2f, 右轮速度: %.2f\n",

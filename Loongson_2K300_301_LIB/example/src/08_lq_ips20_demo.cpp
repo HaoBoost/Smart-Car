@@ -20,7 +20,26 @@
 void lq_ips20_demo()
 {
     lq_ips20_drv_init(1);
+
+    // 显示中文
+    lq_display_font_t ssss = {
+        .font_idx = tfont_Idx,              // 中文索引
+        .font_data = tfont_32x32,           // 中文字库
+        .font_size = sizeof(tfont_32x32)    // 字库长度
+    };
+
     lq_ips20_drv_fill_area(10, 20, 30, 40, U16YELLOW);
     lq_ips20_drv_draw_line(10, 20, 30, 40, U16RED);
     lq_ips20_drv_draw_circle(50, 50, 30, U16BLACK);
+    sleep(1);
+
+    while (ls_system_running.load())
+    {
+        // 写中文字符
+        lq_ips20_drv_cstr(0, 120, "龙邱科技", ssss, U16RED, U16PURPLE);
+            
+        // 显示图片
+        lq_ips20_drv_image(10, 10, 100, 80, gImage_2);
+        sleep(1);
+    }
 }
